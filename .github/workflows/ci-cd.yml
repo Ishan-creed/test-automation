@@ -55,8 +55,9 @@ jobs:
 
       # Step 6: (Optional) Upload any generated artifacts (e.g., screenshots, logs)
       - name: Upload Artifacts
-        if: always()  # This step runs even if previous steps fail
-        uses: actions/upload-artifact@v3
+        if: always()
+        uses: actions/upload-artifact@v3.1.3
         with:
           name: automation-artifacts
-          path: artifacts/   # Ensure your script saves outputs or logs to an "artifacts" folder
+          path: artifacts/
+      
