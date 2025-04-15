@@ -51,7 +51,7 @@ jobs:
           ASSIGNED_PASSWORD: ${{ secrets.ASSIGNED_PASSWORD }}
           BROWSER: ${{ secrets.BROWSER }}
           POLICY_TYPE: ${{ secrets.POLICY_TYPE }}
-        run: python Block_site_visit_AI_manual.py
+        run: Site_Vist/python Block_site_visit_AI_manual.py
 
       # Step 6: (Optional) Upload any generated artifacts (e.g., screenshots, logs)
       - name: Upload Artifacts
