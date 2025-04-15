@@ -82,21 +82,21 @@ def print_details():
     print("--------------------------------------------------------------------------------------------------")
 ##############################################################################
 driver = None
-
 if browser == "chrome":
     chrome_driver = ChromeDriverManager().install()
     service = ChromeService(chrome_driver)
     options = webdriver.ChromeOptions()
     
-    # Critical options for CI environment
+    # Essential options for CI environment
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--disable-gpu')
     options.add_argument('--window-size=1920,1080')
     
-    # Unique user profile with proper temp directory
+    # Unique user profile
     import tempfile
-    user_data_dir = tempfile.mkdtemp()
+    import time
+    user_data_dir = f"/tmp/chrome-data-{int(time.time())}"
     options.add_argument(f'--user-data-dir={user_data_dir}')
     
     # For visible browser
@@ -105,16 +105,15 @@ if browser == "chrome":
     if extension_path:
         options.add_argument(f"--load-extension={extension_path}")
     
-    # Add these experimental options
+    # Add experimental options
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.add_experimental_option('useAutomationExtension', False)
     
-    # Single driver instance with proper service setup
+    # Correct driver initialization
     try:
         driver = webdriver.Chrome(
             service=service,
-            options=options,
-            service_args=['--verbose']
+            options=options
         )
     except Exception as e:
         print(f"Failed to start Chrome: {str(e)}")
