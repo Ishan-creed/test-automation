@@ -42,6 +42,14 @@ jobs:
           export DISPLAY=:99
           sleep 5  # Give Xvfb time to start
 
+      - name: Cleanup Chrome Processes and Temporary Directories
+        run: |
+          pkill -f chrome || true
+          pkill -f Xvfb || true
+          sleep 2
+          mkdir -p /tmp/chrome-data
+          chmod 777 /tmp/chrome-data
+          
       - name: Run Block Site Visit Script
         env:
           ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
@@ -52,11 +60,25 @@ jobs:
           BROWSER: "chrome"
           POLICY_TYPE: ${{ secrets.POLICY_TYPE }}
           EXTENSION_PATH: ${{ secrets.EXTENSION_PATH }}
+          DISPLAY: :99
         run: |
-          # Clean up any existing Chrome processes
-          pkill -o -f "chrome" || true
           python Block_site_visit_AI_manual.py
-
-      - name: Stop Xvfb
-        if: always()
-        run: pkill -f "Xvfb"
+      
+            - name: Run Block Site Visit Script
+              env:
+                ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
+                ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+                TENANT_URL: ${{ secrets.TENANT_URL }}
+                ASSIGNED_USERNAME: ${{ secrets.ASSIGNED_USERNAME }}
+                ASSIGNED_PASSWORD: ${{ secrets.ASSIGNED_PASSWORD }}
+                BROWSER: "chrome"
+                POLICY_TYPE: ${{ secrets.POLICY_TYPE }}
+                EXTENSION_PATH: ${{ secrets.EXTENSION_PATH }}
+              run: |
+                # Clean up any existing Chrome processes
+                pkill -o -f "chrome" || true
+                python Block_site_visit_AI_manual.py
+      
+            - name: Stop Xvfb
+              if: always()
+              run: pkill -f "Xvfb"
