@@ -93,32 +93,36 @@ if browser == "chrome":
     options.add_argument('--disable-gpu')
     options.add_argument('--window-size=1920,1080')
     
-    # Unique user profile
+    # Create a unique temporary directory for user data
     import tempfile
-    import time
-    user_data_dir = f"/tmp/chrome-data-{int(time.time())}"
+    import os
+    user_data_dir = os.path.join(tempfile.gettempdir(), f"chrome-data-{int(time.time())}")
+    os.makedirs(user_data_dir, exist_ok=True)
     options.add_argument(f'--user-data-dir={user_data_dir}')
     
-    # For visible browser
-    options.add_argument('--start-maximized')
-    
+    # Add extension if path provided
     if extension_path:
         options.add_argument(f"--load-extension={extension_path}")
+    
+    # For headless operation in CI
+    options.add_argument('--headless')
     
     # Add experimental options
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.add_experimental_option('useAutomationExtension', False)
     
-    # Correct driver initialization
-    try:
-        driver = webdriver.Chrome(
-            service=service,
-            options=options
-        )
-    except Exception as e:
-        print(f"Failed to start Chrome: {str(e)}")
-        raise
-
+    # Initialize driver with retry mechanism
+    max_attempts = 3
+    for attempt in range(max_attempts):
+        try:
+            print(f"Attempt {attempt+1} to initialize Chrome driver")
+            driver = webdriver.Chrome(service=service, options=options)
+            break
+        except Exception as e:
+            print(f"Driver initialization failed: {str(e)}")
+            if attempt == max_attempts - 1:
+                raise
+            time.sleep(2)  # Wait before retry
 elif browser == "edge":
     edge_driver = EdgeChromiumDriverManager().install()  # Get the EdgeDriver executable
     options = webdriver.EdgeOptions()
