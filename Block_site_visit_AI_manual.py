@@ -84,11 +84,10 @@ def print_details():
 driver = None
 
 if browser == "chrome":
-    options = webdriver.ChromeOptions()
-    options.add_argument(f"--load-extension={extension_path}")  # Load Chrome extension
-    
-    # For Selenium 4.0+
-    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
+        options = webdriver.ChromeOptions()
+        options.add_argument(f"--load-extension={extension_path}")
+        options.add_argument("--incognito")  # Add this line
+        driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
 elif browser == "edge":
     edge_driver = EdgeChromiumDriverManager().install()  # Get the EdgeDriver executable
     options = webdriver.EdgeOptions()
