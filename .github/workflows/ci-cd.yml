@@ -36,10 +36,18 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y google-chrome-stable
-          CHROME_VERSION=$(google-chrome --version | awk '{print $3}')
-          wget https://chromedriver.storage.googleapis.com/${CHROME_VERSION}/chromedriver_linux64.zip
+          # Extract the full version number from installed Chrome
+          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+\.\d+')
+          # Extract the major version (e.g., "135")
+          MAJOR_VERSION=$(echo $CHROME_VERSION | cut -d. -f1)
+          # Get the latest Chromedriver version for the major version
+          CHROMEDRIVER_VERSION=$(wget -qO- https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$MAJOR_VERSION)
+          # Download the corresponding Chromedriver
+          wget https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip
+          # Unzip and install
           unzip chromedriver_linux64.zip
           sudo mv chromedriver /usr/local/bin/
+
 
       # Step 5: Run your automation script
       - name: Run Block Site Visit Script
