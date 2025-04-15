@@ -83,46 +83,11 @@ def print_details():
 ##############################################################################
 driver = None
 if browser == "chrome":
-    chrome_driver = ChromeDriverManager().install()
-    service = ChromeService(chrome_driver)
+    chrome_driver = ChromeDriverManager().install()  # Get the ChromeDriver executable
+    # options = Options()
     options = webdriver.ChromeOptions()
-    
-    # Essential options for CI environment
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
-    options.add_argument('--disable-gpu')
-    options.add_argument('--window-size=1920,1080')
-    
-    # Create a unique temporary directory for user data
-    # import tempfile
-    # import os
-    # user_data_dir = os.path.join(tempfile.gettempdir(), f"chrome-data-{int(time.time())}")
-    # os.makedirs(user_data_dir, exist_ok=True)
-    # options.add_argument(f'--user-data-dir={user_data_dir}')
-    
-    # Add extension if path provided
-    if extension_path:
-        options.add_argument(f"--load-extension={extension_path}")
-    
-    # # For headless operation in CI
-    # options.add_argument('--headless')
-    
-    # Add experimental options
-    options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    options.add_experimental_option('useAutomationExtension', False)
-    
-    # Initialize driver with retry mechanism
-    max_attempts = 3
-    for attempt in range(max_attempts):
-        try:
-            print(f"Attempt {attempt+1} to initialize Chrome driver")
-            driver = webdriver.Chrome(service=service, options=options)
-            break
-        except Exception as e:
-            print(f"Driver initialization failed: {str(e)}")
-            if attempt == max_attempts - 1:
-                raise
-            time.sleep(2)  # Wait before retry
+    options.add_argument(f"--load-extension={extension_path}")  # Load Chrome extension
+    driver = webdriver.Chrome(service=ChromeService(chrome_driver), options=options)
 elif browser == "edge":
     edge_driver = EdgeChromiumDriverManager().install()  # Get the EdgeDriver executable
     options = webdriver.EdgeOptions()
