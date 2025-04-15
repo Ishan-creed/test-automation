@@ -53,10 +53,10 @@ jobs:
           POLICY_TYPE: ${{ secrets.POLICY_TYPE }}
         run: Site_Vist/python Block_site_visit_AI_manual.py
 
-      # Step 6: (Optional) Upload any generated artifacts (e.g., screenshots, logs)
-      - name: Upload Artifacts
-        if: always()
-        uses: actions/upload-artifact@v3.1.2
-        with:
-          name: automation-artifacts
-          path: artifacts/
+      # # Step 6: (Optional) Upload any generated artifacts (e.g., screenshots, logs)
+      # - name: Upload Artifacts
+      #   if: always()
+      #   uses: actions/upload-artifact@v3.1.2
+      #   with:
+      #     name: automation-artifacts
+      #     path: artifacts/
