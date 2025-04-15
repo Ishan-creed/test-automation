@@ -26,24 +26,17 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
+          pip install selenium webdriver-manager python-dotenv
 
       - name: Install Chrome and ChromeDriver
+        uses: browser-actions/setup-chrome@latest
+        with:
+          chrome-version: 'latest'
+
+      - name: Verify Chrome Installation
         run: |
-          sudo apt update
-          sudo apt install -y google-chrome-stable
-          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+\.\d+')
-          MAJOR_VERSION=$(echo $CHROME_VERSION | cut -d. -f1)
-          echo "Installed Chrome version: $CHROME_VERSION (major: $MAJOR_VERSION)"
-          CHROMEDRIVER_VERSION=$(curl -sS "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$MAJOR_VERSION")
-          if [[ ! $CHROMEDRIVER_VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "No valid Chromedriver release found for major version $MAJOR_VERSION."
-            echo "Falling back to generic latest Chromedriver release."
-            CHROMEDRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE)
-          fi
-          echo "Chromedriver version to download: $CHROMEDRIVER_VERSION"
-          wget "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip" -O chromedriver_linux64.zip
-          unzip chromedriver_linux64.zip
-          sudo mv chromedriver /usr/local/bin/
+          google-chrome --version
+          which google-chrome
 
       - name: Run Block Site Visit Script
         env:
@@ -54,11 +47,15 @@ jobs:
           ASSIGNED_PASSWORD: ${{ secrets.ASSIGNED_PASSWORD }}
           BROWSER: ${{ secrets.BROWSER }}
           POLICY_TYPE: ${{ secrets.POLICY_TYPE }}
-        run: python Block_site_visit_AI_manual.py
+          EXTENSION_PATH: ${{ secrets.EXTENSION_PATH }}
+        run: |
+          # Add a small delay to ensure Chrome is fully installed
+          sleep 5
+          python Block_site_visit_AI_manual.py
 
-      # - name: Upload Artifacts
+      # - name: Upload Artifacts (if needed)
       #   if: always()
       #   uses: actions/upload-artifact@v3
       #   with:
-      #     name: automation-artifacts
-      #     path: artifacts/
+      #     name: automation-screenshots
+      #     path: screenshots/
