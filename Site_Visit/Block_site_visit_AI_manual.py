@@ -21,13 +21,13 @@ from selenium.webdriver.chrome.options import Options
 
 #########################################################################################
 # Load environment variables from the .env file
-env_path = Path("./config_data.env")
-load_dotenv(dotenv_path=env_path)
+# env_path = Path("./config_data.env")
+# load_dotenv(dotenv_path=env_path)
 
 # Get environment variables
 admin_username = os.getenv("ADMIN_USERNAME")
 admin_password = os.getenv("ADMIN_PASSWORD")
-tenant_name = os.getenv("TENANT_NAME")
+tenant_name = "onsqrx"
 tenant_url = os.getenv("TENANT_URL")
 
 assigned_username = os.getenv("ASSIGNED_USERNAME")

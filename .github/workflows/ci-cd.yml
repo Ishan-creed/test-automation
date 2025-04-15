@@ -1,0 +1,62 @@
+name: Python Automation CI/CD
+
+# Trigger the workflow on push, pull requests, and manually
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+  schedule:                # Optional: run on a schedule (daily at 2 AM UTC)
+    - cron: '0 2 * * *'
+
+jobs:
+  run-automation:
+    runs-on: ubuntu-latest  # Using an Ubuntu runner; you can choose macos or windows if needed
+
+    steps:
+      # Step 1: Checkout your repository code
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Step 2: Set up the Python environment
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"  # Choose your Python version
+
+      # Step 3: Install dependencies
+      - name: Install Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Step 4: (Optional) Install browser and driver if your script uses Selenium for web automation
+      - name: Install Chrome and ChromeDriver
+        run: |
+          sudo apt update
+          sudo apt install -y google-chrome-stable
+          CHROME_VERSION=$(google-chrome --version | awk '{print $3}')
+          wget https://chromedriver.storage.googleapis.com/${CHROME_VERSION}/chromedriver_linux64.zip
+          unzip chromedriver_linux64.zip
+          sudo mv chromedriver /usr/local/bin/
+
+      # Step 5: Run your automation script
+      - name: Run Block Site Visit Script
+        env:
+        ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
+        ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+        TENANT_URL: ${{ secrets.TENANT_URL }}
+        ASSIGNED_USERNAME: ${{ secrets.ASSIGNED_USERNAME }}
+        ASSIGNED_PASSWORD: ${{ secrets.ASSIGNED_PASSWORD }}
+        BROWSER: ${{ secrets.BROWSER }}
+        POLICY_TYPE: ${{ secrets.POLICY_TYPE }}
+        run: python Block_site_visit_AI_manual.py
+
+      # Step 6: (Optional) Upload any generated artifacts (e.g., screenshots, logs)
+      - name: Upload Artifacts
+        if: always()  # This step runs even if previous steps fail
+        uses: actions/upload-artifact@v3
+        with:
+          name: automation-artifacts
+          path: artifacts/   # Ensure your script saves outputs or logs to an "artifacts" folder
