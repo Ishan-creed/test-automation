@@ -1,55 +1,49 @@
 name: Python Automation CI/CD
 
-# Trigger the workflow on push, pull requests, and manually
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
-  schedule:                # Optional: run on a schedule (daily at 2 AM UTC)
+  schedule:                
     - cron: '0 2 * * *'
 
 jobs:
   run-automation:
-    runs-on: ubuntu-latest  # Using an Ubuntu runner; you can choose macos or windows if needed
+    runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout your repository code
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # Step 2: Set up the Python environment
       - name: Set Up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.9"  # Choose your Python version
+          python-version: "3.9"
 
-      # Step 3: Install dependencies
       - name: Install Dependencies
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
 
-      # Step 4: (Optional) Install browser and driver if your script uses Selenium for web automation
       - name: Install Chrome and ChromeDriver
         run: |
           sudo apt update
           sudo apt install -y google-chrome-stable
-          # Extract the full version number from installed Chrome
           CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+\.\d+')
-          # Extract the major version (e.g., "135")
           MAJOR_VERSION=$(echo $CHROME_VERSION | cut -d. -f1)
-          # Get the latest Chromedriver version for the major version
-          CHROMEDRIVER_VERSION=$(wget -qO- https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$MAJOR_VERSION)
-          # Download the corresponding Chromedriver
-          wget https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip
-          # Unzip and install
+          echo "Installed Chrome version: $CHROME_VERSION (major: $MAJOR_VERSION)"
+          CHROMEDRIVER_VERSION=$(curl -sS "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$MAJOR_VERSION")
+          if [ -z "$CHROMEDRIVER_VERSION" ]; then
+            echo "Could not find a Chromedriver release for major version $MAJOR_VERSION. Falling back to generic latest release."
+            CHROMEDRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE)
+          fi
+          echo "Chromedriver version to download: $CHROMEDRIVER_VERSION"
+          wget "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip" -O chromedriver_linux64.zip
           unzip chromedriver_linux64.zip
           sudo mv chromedriver /usr/local/bin/
 
-
-      # Step 5: Run your automation script
       - name: Run Block Site Visit Script
         env:
           ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
@@ -61,10 +55,9 @@ jobs:
           POLICY_TYPE: ${{ secrets.POLICY_TYPE }}
         run: Site_Vist/python Block_site_visit_AI_manual.py
 
-      # # Step 6: (Optional) Upload any generated artifacts (e.g., screenshots, logs)
       # - name: Upload Artifacts
       #   if: always()
-      #   uses: actions/upload-artifact@v3.1.2
+      #   uses: actions/upload-artifact@v3
       #   with:
       #     name: automation-artifacts
       #     path: artifacts/
