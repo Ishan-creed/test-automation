@@ -1,0 +1,10 @@
+openpyxl
+pandas
+psutil
+pyautogui
+pyperclip
+python-dotenv
+requests
+selenium
+webdriver-manager
+xhtml2pdf
