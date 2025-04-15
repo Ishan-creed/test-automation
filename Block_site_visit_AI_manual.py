@@ -88,19 +88,37 @@ if browser == "chrome":
     service = ChromeService(chrome_driver)
     options = webdriver.ChromeOptions()
     
-    # Essential options for CI environment
+    # Critical options for CI environment
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
-    options.add_argument(f'--user-data-dir=/tmp/chrome-profile-{int(time.time())}')  # Unique profile
+    options.add_argument('--disable-gpu')
+    options.add_argument('--window-size=1920,1080')
     
-    # For visible browser (non-headless)
+    # Unique user profile with proper temp directory
+    import tempfile
+    user_data_dir = tempfile.mkdtemp()
+    options.add_argument(f'--user-data-dir={user_data_dir}')
+    
+    # For visible browser
     options.add_argument('--start-maximized')
     
     if extension_path:
         options.add_argument(f"--load-extension={extension_path}")
     
-    # Single driver instance
-    driver = webdriver.Chrome(service=service, options=options)
+    # Add these experimental options
+    options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    options.add_experimental_option('useAutomationExtension', False)
+    
+    # Single driver instance with proper service setup
+    try:
+        driver = webdriver.Chrome(
+            service=service,
+            options=options,
+            service_args=['--verbose']
+        )
+    except Exception as e:
+        print(f"Failed to start Chrome: {str(e)}")
+        raise
 
 elif browser == "edge":
     edge_driver = EdgeChromiumDriverManager().install()  # Get the EdgeDriver executable
