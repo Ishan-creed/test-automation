@@ -54,7 +54,7 @@ jobs:
           ASSIGNED_PASSWORD: ${{ secrets.ASSIGNED_PASSWORD }}
           BROWSER: ${{ secrets.BROWSER }}
           POLICY_TYPE: ${{ secrets.POLICY_TYPE }}
-        run: Site_Vist/python Block_site_visit_AI_manual.py
+        run: python Block_site_visit_AI_manual.py
 
       # - name: Upload Artifacts
       #   if: always()
