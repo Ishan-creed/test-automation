@@ -84,10 +84,10 @@ def print_details():
 driver = None
 if browser == "chrome":
     chrome_driver = ChromeDriverManager().install()  # Get the ChromeDriver executable
-    # options = Options()
+    options = Options()
     options = webdriver.ChromeOptions()
     options.add_argument(f"--load-extension={extension_path}")  # Load Chrome extension
-    driver = webdriver.Chrome(service=ChromeService(chrome_driver), options=options)
+    # driver = webdriver.Chrome(service=ChromeService(chrome_driver), options=options)
 elif browser == "edge":
     edge_driver = EdgeChromiumDriverManager().install()  # Get the EdgeDriver executable
     options = webdriver.EdgeOptions()
