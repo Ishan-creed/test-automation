@@ -85,29 +85,10 @@ driver = None
 
 if browser == "chrome":
         
-        temp_dir = tempfile.mkdtemp()
-        
-        options = webdriver.ChromeOptions()
-        options.add_argument(f"--load-extension={extension_path}")
-        options.add_argument(f"--user-data-dir={temp_dir}")  # Unique dir for each run
-        options.add_argument("--no-first-run")
-        options.add_argument("--no-default-browser-check")
-        
-        try:
-            driver = webdriver.Chrome(
-                service=ChromeService(ChromeDriverManager().install()),
-                options=options
-            )
-        finally:
-            # Clean up (optional)
-            try:
-                driver.quit()
-            except:
-                pass
-            try:
-                os.rmdir(temp_dir)
-            except:
-                pass
+    chrome_driver = ChromeDriverManager().install()  # Get the ChromeDriver executable
+    options = webdriver.ChromeOptions()
+    options.add_argument(f"--load-extension={extension_path}")  # Load Chrome extension
+    driver = webdriver.Chrome(service=ChromeService(chrome_driver), options=options)
 elif browser == "edge":
         
     edge_driver = EdgeChromiumDriverManager().install()  # Get the EdgeDriver executable
