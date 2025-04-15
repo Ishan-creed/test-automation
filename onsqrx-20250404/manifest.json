@@ -1,0 +1,150 @@
+{
+  "icons": {
+    "16": "assets/icon16.png",
+    "32": "assets/icon32.png",
+    "48": "assets/icon48.png",
+    "64": "assets/icon64.png",
+    "128": "assets/icon128.png"
+  },
+  "action": {
+    "default_icon": {
+      "16": "assets/icon16.png",
+      "32": "assets/icon32.png",
+      "48": "assets/icon48.png",
+      "64": "assets/icon64.png",
+      "128": "assets/icon128.png"
+    },
+    "default_popup": "popup.html"
+  },
+  "version": "0.9.73",
+  "author": "SquareX Team",
+  "name": "SquareX Enterprise",
+  "description": "Browser Detection and Response (BDR)",
+  "background": {
+    "service_worker": "background.4LWHCQUC.js"
+  },
+  "permissions": [
+    "storage",
+    "tabs",
+    "alarms",
+    "scripting",
+    "offscreen",
+    "tabGroups",
+    "webRequest",
+    "unlimitedStorage",
+    "webNavigation",
+    "contextMenus",
+    "downloads",
+    "nativeMessaging",
+    "system.cpu",
+    "system.memory",
+    "identity",
+    "identity.email",
+    "proxy",
+    "webRequestAuthProvider",
+    "clipboardWrite",
+    "clipboardRead",
+    "management",
+    "declarativeNetRequest",
+    "privacy"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "exclude_matches": [
+        "https://meet.google.com/*"
+      ],
+      "js": [
+        "content.R4DICTSV.js"
+      ],
+      "all_frames": true,
+      "run_at": "document_start",
+      "css": [
+        "content.QVW76JEV.css"
+      ],
+      "match_about_blank": true
+    },
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "exclude_matches": [
+        "https://meet.google.com/*"
+      ],
+      "js": [
+        "injected-scripts/injected-script_fetch-proxy.js",
+        "injected-scripts/injected-script_object-url-proxy.js",
+        "injected-scripts/injected-script_clipboard-intervention.js",
+        "injected-scripts/injected-script_site-content-intervention.js",
+        "injected-scripts/injected-script_upload-intervention.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true,
+      "world": "MAIN",
+      "match_about_blank": true
+    }
+  ],
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiDm2Sg41dC+iCOS6Q9oRyLze1IGv0lsvQnrkZ3kM9ak9hFmVWm6bIg+097x92ppISBTArSlUgr9xTeXFWHNTv7frT1VL9fAyZDKEUCYeGnbjePZTyCl6Jz4jVgW8zGGwGoBc8LnyokfU9ppSy5iSDYa+ISk/qPuwlewu0nGRCBVXZp4K4i63FmJnZRgYlrwdQBasO/SZHv4KSP32yT0AydW7kk4Qcgn7q3Upnni4knEx2VBhxupZaMHFbas0pQVNdQV8ZGMXOgGbtqPWrZqROhu7Bgnp7+sNArTJD35ojw6jyNUHe7KuTe6otTMlHEh2bpbdGFCp7643a2eiMjbFwwIDAQAB",
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "assets/blurry.png",
+        "assets/sqrx-logo-white.png",
+        "assets/shield-danger.svg",
+        "assets/shield-safe.svg",
+        "assets/shield-warning.svg",
+        "assets/shield-minus.svg",
+        "assets/shield-blank.svg",
+        "assets/requires-password.svg",
+        "assets/doc.svg",
+        "assets/xls.svg",
+        "assets/ppt.svg",
+        "assets/download-pdf-icon.svg",
+        "assets/open-in-dfv.svg",
+        "assets/office.svg",
+        "assets/office-white.svg",
+        "assets/icon.png",
+        "assets/icon16.png",
+        "assets/si.png",
+        "assets/file-question.svg",
+        "assets/winzip.svg",
+        "assets/sqrx-banner-sm.png",
+        "assets/blob-opfs-safari-proxy.js",
+        "assets/loader.gif",
+        "sqrx-email-notifier/*",
+        "sqrx-notification-bar/*",
+        "sqrx-dialog/*",
+        "injected-scripts/injected-script_fetch-proxy.js",
+        "injected-scripts/injected-script_object-url-proxy.js",
+        "injected-scripts/injected-script_clipboard-intervention.js",
+        "injected-scripts/injected-script_site-content-intervention.js",
+        "injected-scripts/injected-script_upload-intervention.js",
+        "content.QVW76JEV.css",
+        "redirector.html",
+        "pending.html"
+      ],
+      "matches": [
+        "https://*/*",
+        "http://*/*",
+        "http://localhost/*"
+      ]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "style-src 'self' 'unsafe-inline'; script-src 'self' 'wasm-unsafe-eval';"
+  },
+  "host_permissions": [
+    "<all_urls>",
+    "http://localhost/*",
+    "https://*.onsqrx.com/*"
+  ],
+  "externally_connectable": {
+    "matches": [
+      "https://*.onsqrx.com/*"
+    ]
+  },
+  "update_url": "https://enterprise.onsqrx.com/extension/preview/c8b1c707a96b2b027355171f4a814256/update.xml",
+  "manifest_version": 3
+}
