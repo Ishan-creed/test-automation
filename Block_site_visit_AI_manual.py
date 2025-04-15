@@ -93,12 +93,6 @@ if browser == "chrome":
     service = ChromeService(executable_path=chrome_driver)
     options = webdriver.ChromeOptions()
     options.add_argument(f"--load-extension={extension_path}")
-    # Create a unique temporary directory for the Chrome user data
-    temp_profile_dir = tempfile.mkdtemp()
-    options.add_argument(f"--user-data-dir={temp_profile_dir}")
-    print(f"Using temporary Chrome profile directory: {temp_profile_dir}")
-
-    # Initialize the Chrome driver only once with the updated options
     driver = webdriver.Chrome(service=service, options=options)
 
 elif browser == "edge":
