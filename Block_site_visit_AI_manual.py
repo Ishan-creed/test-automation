@@ -84,16 +84,11 @@ def print_details():
 driver = None
 
 if browser == "chrome":
-    from selenium.webdriver.chrome.service import Service as ChromeService
-    from webdriver_manager.chrome import ChromeDriverManager
-    from selenium import webdriver
-    import tempfile
-
     chrome_driver = ChromeDriverManager().install()
-    service = ChromeService(executable_path=chrome_driver)
+    service = ChromeService(chrome_driver)
     options = webdriver.ChromeOptions()
     options.add_argument(f"--load-extension={extension_path}")
-    driver = webdriver.Chrome(service=service, options=options)
+    driver = webdriver.Chrome(service=service, options=options)  # Only this line is needed
 
 elif browser == "edge":
     edge_driver = EdgeChromiumDriverManager().install()  # Get the EdgeDriver executable
