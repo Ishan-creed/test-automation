@@ -10,14 +10,10 @@ jobs:
   run-automation:
     runs-on: ubuntu-latest
 
-    # Required for GUI applications
-    services:
-      xvfb:
-        runs-on: ubuntu-latest
-        container: node:16
-        options: --net host
-        ports:
-          - 5900:5900
+    # Add these steps before the steps section
+    defaults:
+      run:
+        shell: bash
 
     steps:
       - name: Checkout Repository
@@ -31,7 +27,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget unzip xvfb
+          sudo apt-get install -y wget unzip xvfb libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xinput0 libxcb-xfixes0
           pip install --upgrade pip
           pip install selenium webdriver-manager python-dotenv pyvirtualdisplay
 
@@ -39,6 +35,12 @@ jobs:
         run: |
           sudo apt-get install -y google-chrome-stable
           google-chrome --version
+
+      - name: Start Xvfb
+        run: |
+          Xvfb :99 -screen 0 1920x1080x24 &
+          export DISPLAY=:99
+          sleep 5  # Give Xvfb time to start
 
       - name: Run Block Site Visit Script
         env:
@@ -53,9 +55,8 @@ jobs:
         run: |
           # Clean up any existing Chrome processes
           pkill -o -f "chrome" || true
-          
-          # Start virtual display for GUI
-          Xvfb :99 -screen 0 1920x1080x24 &
-          export DISPLAY=:99
-          
           python Block_site_visit_AI_manual.py
+
+      - name: Stop Xvfb
+        if: always()
+        run: pkill -f "Xvfb"
