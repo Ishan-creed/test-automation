@@ -10,6 +10,11 @@ jobs:
   run-automation:
     runs-on: ubuntu-latest
 
+    # Add these steps before the steps section
+    defaults:
+      run:
+        shell: bash
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -19,33 +24,25 @@ jobs:
         with:
           python-version: "3.9"
 
-      - name: Install System Dependencies
+      - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y xvfb libxss1 libgtk-3-0 libgdk-pixbuf2.0-0 \
-          libnss3-dev libatk1.0-0 libatk-bridge2.0-0 libcups2 libxcomposite1 \
-          libxdamage1 libxfixes3 libxrandr2 libgbm1 libpango-1.0-0 libcairo2 \
-          libasound2 fonts-liberation libappindicator3-1 libnspr4 libdrm2 \
-          libxshmfence1 libx11-xcb1
+          sudo apt-get install -y wget unzip xvfb libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xinput0 libxcb-xfixes0
+          pip install --upgrade pip
+          pip install selenium webdriver-manager python-dotenv pyvirtualdisplay
 
       - name: Install Chrome
         run: |
           sudo apt-get install -y google-chrome-stable
-          sudo rm -f /etc/apt/sources.list.d/google-chrome.list
-          echo "Chrome version: $(google-chrome --version)"
+          google-chrome --version
 
-      - name: Install Python Packages
+      - name: Start Xvfb
         run: |
-          pip install --upgrade pip
-          pip install selenium webdriver-manager python-dotenv pyvirtualdisplay
+          Xvfb :99 -screen 0 1920x1080x24 &
+          export DISPLAY=:99
+          sleep 5  # Give Xvfb time to start
 
-      - name: Setup Virtual Display
-        run: |
-          Xvfb :99 -screen 0 1920x1080x24 -ac +extension GLX +render -noreset > /dev/null 2>&1 &
-          echo "DISPLAY=:99" >> $GITHUB_ENV
-          sleep 5
-
-      - name: Run Tests
+      - name: Run Block Site Visit Script
         env:
           ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
@@ -56,15 +53,10 @@ jobs:
           POLICY_TYPE: ${{ secrets.POLICY_TYPE }}
           EXTENSION_PATH: ${{ secrets.EXTENSION_PATH }}
         run: |
-          # Clean up any existing processes
-          pkill -f "chrome|chromedriver|Xvfb" || true
-          
-          # Run test script
+          # Clean up any existing Chrome processes
+          pkill -o -f "chrome" || true
           python Block_site_visit_AI_manual.py
 
-      - name: Cleanup
+      - name: Stop Xvfb
         if: always()
-        run: |
-          pkill -f "chrome|chromedriver|Xvfb" || true
-          rm -rf /tmp/.com.google.Chrome* || true
-          rm -rf /tmp/.org.chromium.Chromium* || true
+        run: pkill -f "Xvfb"
