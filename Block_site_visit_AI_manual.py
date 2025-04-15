@@ -84,12 +84,23 @@ def print_details():
 driver = None
 
 if browser == "chrome":
+    from selenium.webdriver.chrome.service import Service as ChromeService
+    from webdriver_manager.chrome import ChromeDriverManager
+    from selenium import webdriver
+    import tempfile
+
     chrome_driver = ChromeDriverManager().install()
-    service = ChromeService(chrome_driver)
+    service = ChromeService(executable_path=chrome_driver)
     options = webdriver.ChromeOptions()
     options.add_argument(f"--load-extension={extension_path}")
-    driver = webdriver.Chrome(service=service, options=options) # Load Chrome extension
-    driver = webdriver.Chrome(service=ChromeService(chrome_driver), options=options)
+    # Create a unique temporary directory for the Chrome user data
+    temp_profile_dir = tempfile.mkdtemp()
+    options.add_argument(f"--user-data-dir={temp_profile_dir}")
+    print(f"Using temporary Chrome profile directory: {temp_profile_dir}")
+
+    # Initialize the Chrome driver only once with the updated options
+    driver = webdriver.Chrome(service=service, options=options)
+
 elif browser == "edge":
     edge_driver = EdgeChromiumDriverManager().install()  # Get the EdgeDriver executable
     options = webdriver.EdgeOptions()
@@ -545,7 +556,7 @@ def open_sites(driver):
 print_details()
 
 login_function()
-# check_for_existing_policies()
+check_for_existing_policies()
 site_visit_policies_creation()
 
 assigned_user_login()
