@@ -87,8 +87,17 @@ if browser == "chrome":
     chrome_driver = ChromeDriverManager().install()
     service = ChromeService(chrome_driver)
     options = webdriver.ChromeOptions()
-    options.add_argument(f"--load-extension={extension_path}")
-    driver = webdriver.Chrome(service=service, options=options)  # Only this line is needed
+    
+    # Add these critical options
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--headless=new')  # For CI environment
+    options.add_argument(f'--user-data-dir=/tmp/chrome-profile-{int(time.time())}')  # Unique profile
+    
+    if extension_path:
+        options.add_argument(f"--load-extension={extension_path}")
+    
+    driver = webdriver.Chrome(service=service, options=options)
 
 elif browser == "edge":
     edge_driver = EdgeChromiumDriverManager().install()  # Get the EdgeDriver executable
