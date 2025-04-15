@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
-  schedule:                
+  schedule:
     - cron: '0 2 * * *'
 
 jobs:
@@ -35,8 +35,9 @@ jobs:
           MAJOR_VERSION=$(echo $CHROME_VERSION | cut -d. -f1)
           echo "Installed Chrome version: $CHROME_VERSION (major: $MAJOR_VERSION)"
           CHROMEDRIVER_VERSION=$(curl -sS "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$MAJOR_VERSION")
-          if [ -z "$CHROMEDRIVER_VERSION" ]; then
-            echo "Could not find a Chromedriver release for major version $MAJOR_VERSION. Falling back to generic latest release."
+          if [[ ! $CHROMEDRIVER_VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "No valid Chromedriver release found for major version $MAJOR_VERSION."
+            echo "Falling back to generic latest Chromedriver release."
             CHROMEDRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE)
           fi
           echo "Chromedriver version to download: $CHROMEDRIVER_VERSION"
