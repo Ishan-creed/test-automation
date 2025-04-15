@@ -5,13 +5,19 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
-  workflow_dispatch:
-  schedule:
-    - cron: '0 2 * * *'
 
 jobs:
   run-automation:
     runs-on: ubuntu-latest
+
+    # Required for GUI applications
+    services:
+      xvfb:
+        runs-on: ubuntu-latest
+        container: node:16
+        options: --net host
+        ports:
+          - 5900:5900
 
     steps:
       - name: Checkout Repository
@@ -24,19 +30,15 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          sudo apt-get update
+          sudo apt-get install -y wget unzip xvfb
           pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install selenium webdriver-manager python-dotenv
+          pip install selenium webdriver-manager python-dotenv pyvirtualdisplay
 
-      - name: Install Chrome and ChromeDriver
-        uses: browser-actions/setup-chrome@latest
-        with:
-          chrome-version: 'latest'
-
-      - name: Verify Chrome Installation
+      - name: Install Chrome
         run: |
+          sudo apt-get install -y google-chrome-stable
           google-chrome --version
-          which google-chrome
 
       - name: Run Block Site Visit Script
         env:
@@ -45,17 +47,15 @@ jobs:
           TENANT_URL: ${{ secrets.TENANT_URL }}
           ASSIGNED_USERNAME: ${{ secrets.ASSIGNED_USERNAME }}
           ASSIGNED_PASSWORD: ${{ secrets.ASSIGNED_PASSWORD }}
-          BROWSER: ${{ secrets.BROWSER }}
+          BROWSER: "chrome"
           POLICY_TYPE: ${{ secrets.POLICY_TYPE }}
           EXTENSION_PATH: ${{ secrets.EXTENSION_PATH }}
         run: |
-          # Add a small delay to ensure Chrome is fully installed
-          sleep 5
+          # Clean up any existing Chrome processes
+          pkill -o -f "chrome" || true
+          
+          # Start virtual display for GUI
+          Xvfb :99 -screen 0 1920x1080x24 &
+          export DISPLAY=:99
+          
           python Block_site_visit_AI_manual.py
-
-      # - name: Upload Artifacts (if needed)
-      #   if: always()
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: automation-screenshots
-      #     path: screenshots/
