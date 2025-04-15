@@ -94,18 +94,18 @@ if browser == "chrome":
     options.add_argument('--window-size=1920,1080')
     
     # Create a unique temporary directory for user data
-    import tempfile
-    import os
-    user_data_dir = os.path.join(tempfile.gettempdir(), f"chrome-data-{int(time.time())}")
-    os.makedirs(user_data_dir, exist_ok=True)
-    options.add_argument(f'--user-data-dir={user_data_dir}')
+    # import tempfile
+    # import os
+    # user_data_dir = os.path.join(tempfile.gettempdir(), f"chrome-data-{int(time.time())}")
+    # os.makedirs(user_data_dir, exist_ok=True)
+    # options.add_argument(f'--user-data-dir={user_data_dir}')
     
     # Add extension if path provided
     if extension_path:
         options.add_argument(f"--load-extension={extension_path}")
     
-    # For headless operation in CI
-    options.add_argument('--headless')
+    # # For headless operation in CI
+    # options.add_argument('--headless')
     
     # Add experimental options
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
