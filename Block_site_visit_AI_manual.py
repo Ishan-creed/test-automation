@@ -17,7 +17,7 @@ from webdriver_manager.microsoft import EdgeChromiumDriverManager
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
-
+import tempfile
 
 #########################################################################################
 # Load environment variables from the .env file
@@ -84,11 +84,32 @@ def print_details():
 driver = None
 
 if browser == "chrome":
+        
+        temp_dir = tempfile.mkdtemp()
+        
         options = webdriver.ChromeOptions()
         options.add_argument(f"--load-extension={extension_path}")
-        options.add_argument("--incognito")  # Add this line
-        driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
+        options.add_argument(f"--user-data-dir={temp_dir}")  # Unique dir for each run
+        options.add_argument("--no-first-run")
+        options.add_argument("--no-default-browser-check")
+        
+        try:
+            driver = webdriver.Chrome(
+                service=ChromeService(ChromeDriverManager().install()),
+                options=options
+            )
+        finally:
+            # Clean up (optional)
+            try:
+                driver.quit()
+            except:
+                pass
+            try:
+                os.rmdir(temp_dir)
+            except:
+                pass
 elif browser == "edge":
+        
     edge_driver = EdgeChromiumDriverManager().install()  # Get the EdgeDriver executable
     options = webdriver.EdgeOptions()
     options.add_argument(f"--load-extension={extension_path}")  # Load Edge extension
