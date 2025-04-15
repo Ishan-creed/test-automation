@@ -88,15 +88,18 @@ if browser == "chrome":
     service = ChromeService(chrome_driver)
     options = webdriver.ChromeOptions()
     
-    # Add these critical options
+    # Essential options for CI environment
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
-    options.add_argument('--headless=new')  # For CI environment
     options.add_argument(f'--user-data-dir=/tmp/chrome-profile-{int(time.time())}')  # Unique profile
+    
+    # For visible browser (non-headless)
+    options.add_argument('--start-maximized')
     
     if extension_path:
         options.add_argument(f"--load-extension={extension_path}")
     
+    # Single driver instance
     driver = webdriver.Chrome(service=service, options=options)
 
 elif browser == "edge":
