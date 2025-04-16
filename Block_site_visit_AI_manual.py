@@ -16,6 +16,7 @@ from webdriver_manager.microsoft import EdgeChromiumDriverManager
 
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.chrome.options import Options
 
 
