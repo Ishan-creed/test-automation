@@ -108,7 +108,7 @@ if browser == "chrome":
         print("Starting WebDriver...")
         driver = webdriver.Remote(
             command_executor='http://localhost:4444/wd/hub',
-            options=chrome_options
+            options=ChromeOptions
         )
         print("✅ WebDriver started successfully")
     except Exception as e:
