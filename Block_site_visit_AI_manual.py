@@ -503,29 +503,112 @@ def click_element(driver, xpath: str, scroll: bool = True, timeout: int = 10):
         print(f"Timeout: Element with XPath '{xpath}' not found.")
         return None
 
-def check_status(driver, timeout=10):
-    try:
-        # Wait until the element with id 'main-title' is present
-        element = WebDriverWait(driver, timeout).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "#main-title"))
-        )
-        main_title = element.text
+def check_status(driver):
+    """
+    Checks if website access was blocked by the extension.
+    Returns tuple: (block_status, failure_reason)
+    - block_status: True if blocked, False if allowed
+    - failure_reason: String explaining status
+    """
+    current_url = driver.current_url
+    debug_data = {
+        "screenshot": None,
+        "page_source": None,
+        "console_logs": [],
+        "network_logs": []
+    }
 
-        # Check if the title matches 'Content Blocked'
-        if main_title == 'Content Blocked':
-            blocked_url = driver.find_element(By.CSS_SELECTOR, "#url").text
-            print("")
-            print(blocked_url, f"Website blocked by Square-X: {driver.current_url}")
-        else:
-            print("")
-            print("********************************************")
-            print(f"Unexpected title: '{main_title}' - Website not blocked: {driver.current_url}")
-            print("********************************************")
-    except (TimeoutException, NoSuchElementException) as e:
-        print("")
-        print("********************************************")
-        print(f"Website not blocked: {driver.current_url}, error: {e}")
-        print("********************************************")
+    try:
+        # 1. Verify extension is loaded
+        try:
+            WebDriverWait(driver, 15).until(
+                lambda d: d.execute_script(
+                    "return window.squareX !== undefined && "
+                    "document.querySelector('squarex-bdm').shadowRoot !== null"
+                )
+            )
+        except TimeoutException:
+            debug_data["failure"] = "Extension not loaded"
+            return False, debug_data
+
+        # 2. Check for common CI/CD security intercepts
+        security_checks = [
+            (By.CSS_SELECTOR, "div#captcha-box", "Captcha Challenge"),
+            (By.ID, "challenge-running", "Cloudflare Challenge"),
+            (By.XPATH, "//h1[contains(text(),'Access Denied')]", "Firewall Block")
+        ]
+
+        for by, selector, message in security_checks:
+            if driver.find_elements(by, selector):
+                debug_data["failure"] = f"CI/CD Security Intercept: {message}"
+                return False, debug_data
+
+        # 3. Wait for page stabilization
+        WebDriverWait(driver, 20).until(
+            lambda d: d.execute_script(
+                "return document.readyState === 'complete' && "
+                "performance.timing.loadEventEnd > 0"
+            )
+        )
+
+        # 4. Check for block page elements
+        try:
+            WebDriverWait(driver, 10).until(
+                EC.visibility_of_any_elements_located(
+                    (By.CSS_SELECTOR, "#main-title, #blocked-url")
+                )
+            )
+            
+            blocked_elements = driver.find_elements(
+                By.CSS_SELECTOR, "#main-title, #url, #blocked-url"
+            )
+
+            if blocked_elements:
+                main_title = blocked_elements[0].text
+                if 'Blocked' in main_title or 'Restricted' in main_title:
+                    blocked_url = driver.find_element(By.CSS_SELECTOR, "#url").text
+                    print(f"✅ Successfully Blocked: {blocked_url}")
+                    return True, debug_data
+
+        except TimeoutException:
+            pass  # Proceed to allowed check
+
+        # 5. Verify actual page load
+        try:
+            WebDriverWait(driver, 15).until(
+                EC.presence_of_element_located(
+                    (By.XPATH, "//body[not(contains(@class,'blocked-page'))]")
+                )
+            )
+            print(f"❌ Not Blocked: {current_url}")
+            return False, debug_data
+
+        except TimeoutException:
+            debug_data["failure"] = "Indeterminate state - neither blocked nor loaded"
+            return False, debug_data
+
+    except Exception as e:
+        # 6. Capture detailed diagnostics
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        debug_data.update({
+            "screenshot": f"block_check_failure_{timestamp}.png",
+            "page_source": f"page_source_{timestamp}.html",
+            "console_logs": driver.get_log("browser"),
+            "network_logs": driver.get_log("performance"),
+            "exception": str(e)
+        })
+
+        try:
+            driver.save_screenshot(debug_data["screenshot"])
+            with open(debug_data["page_source"], "w", encoding="utf-8") as f:
+                f.write(driver.page_source)
+        except WebDriverException as save_error:
+            debug_data["save_error"] = str(save_error)
+
+        print(f"⚠️ Verification Error: {current_url}")
+        print(f"Debug data saved with prefix: block_check_failure_{timestamp}")
+        
+        return False, debug_data
 
 def open_sites(driver):
     """
@@ -548,7 +631,13 @@ def open_sites(driver):
         time.sleep(3)  # Wait for the website to load
 
         # Check status
-        check_status(driver)
+        is_blocked, diagnostics = check_status(driver)
+    
+        if not is_blocked:
+                
+                print(f"Validation failed for {website}")
+                if diagnostics.get("screenshot"):
+                    print(f"Review artifact: {diagnostics['screenshot']}")
      
         # Close current tab and switch back
         # driver.close()
