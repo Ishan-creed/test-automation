@@ -84,12 +84,12 @@ def print_details():
 driver = None
 
 if browser == "chrome":
-    extension_path = "/home/seluser/extension/onsqrx-20250404/"
+    # extension_path = "/home/seluser/extension/onsqrx-20250404/"
 
     from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
     chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument("--load-extension=/home/seluser/extension")
+    chrome_options.add_extension("/home/seluser/extension.crx")
     chrome_options.add_argument("--start-maximized")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--no-sandbox")
