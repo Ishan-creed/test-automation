@@ -101,7 +101,7 @@ if browser == "chrome":
 
     print("Launching Remote WebDriver with options:", chrome_options.arguments)
 
-   driver = webdriver.Remote(
+    driver = webdriver.Remote(
       command_executor='http://localhost:4444/wd/hub',
       desired_capabilities=capabilities,
       options=chrome_options
