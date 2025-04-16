@@ -38,7 +38,7 @@ jobs:
           docker cp ${{ github.workspace }}/onsqrx-20250404.crx $CONTAINER_ID:/home/seluser/extensions
           
           # Verify the file was copied successfully
-          docker exec $CONTAINER_ID ls -la /home/seluser/extensions/onsqrx-20250404.crx
+          docker exec $CONTAINER_ID ls -la /home/seluser/extensions
       
       - name: Run Block Site Visit Script
         env:
