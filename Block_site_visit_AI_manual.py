@@ -84,27 +84,27 @@ def print_details():
 driver = None
 
 if browser == "chrome":
-    # extension_path = "/home/seluser/extension/onsqrx-20250404/"
-
-    from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-
     chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_extension("/home/seluser/onsqrx-20250404.crx")
-    chrome_options.add_argument("--start-maximized")
-    chrome_options.add_argument("--disable-gpu")
+    
+    # Path inside the container
+    extension_path = "/home/seluser/extension.crx"
+    
+    # Add the extension
+    try:
+        chrome_options.add_extension(extension_path)
+        print(f"✅ Extension added from path: {extension_path}")
+    except Exception as e:
+        print(f"❌ Error adding extension: {e}")
+    
+    # Other required options
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-
-# Merge with desired capabilities
-    capabilities = DesiredCapabilities.CHROME.copy()
-    chrome_options.set_capability("goog:chromeOptions", chrome_options.to_capabilities()["goog:chromeOptions"])
-
-    print("Launching Remote WebDriver with options:", chrome_options.arguments)
-
+    
+    # Create the driver
     driver = webdriver.Remote(
-      command_executor='http://localhost:4444/wd/hub',
-      options=chrome_options
-   )
+        command_executor='http://localhost:4444/wd/hub',
+        options=chrome_options
+    )
 
     # Give browser time to initialize
     time.sleep(5)
