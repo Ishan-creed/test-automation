@@ -10,18 +10,28 @@ from selenium.webdriver.common.by import By
 from datetime import datetime
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, ElementNotInteractableException
+import tempfile
+from selenium.webdriver import Remote
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 from selenium.webdriver.edge.service import Service as EdgeService
 from webdriver_manager.microsoft import EdgeChromiumDriverManager
 
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+
+
+required_envs = ["ADMIN_USERNAME", "ADMIN_PASSWORD", "TENANT_URL", "EXTENSION_PATH"]
+missing = [key for key in required_envs if not os.getenv(key)]
+
+if missing:
+    raise EnvironmentError(f"Missing environment variables: {', '.join(missing)}")
 
 
 #########################################################################################
-# Load environment variables from the .env file
+# # Load environment variables from the .env file
 # env_path = Path("./config_data.env")
 # load_dotenv(dotenv_path=env_path)
 
@@ -73,7 +83,7 @@ def print_details():
     print(f"Browser version: {browser_version}")
     print(f"Platform name: {platform_name}")
     # Extract the directory containing the extension name
- 
+    extension_dir = "../onsqrx-20250404/"
 
     # Extract the extension name by splitting based on the last backslash
     extension_name = "SquareX BDM"
@@ -95,25 +105,12 @@ if browser == "chrome":
     options.add_argument("--remote-debugging-port=9222")
 
     # Load extension if needed
-    with open("extension_base64.txt", "r") as f:
+    with open("tests/extension_base64.txt", "r") as f:
         encoded = f.read()
     options.add_encoded_extension(encoded)
 
     # Create Remote WebDriver with configured options
     driver = webdriver.Remote(command_executor=grid_url, options=options)
-
-    
-    # Create the driver with more verbose error handling
-    try:
-        print("Starting WebDriver...")
-        driver = webdriver.Remote(
-            command_executor='http://localhost:4444/wd/hub',
-            options=ChromeOptions
-        )
-        print("✅ WebDriver started successfully")
-    except Exception as e:
-        print(f"❌ WebDriver error: {e}")
-        raise
 
 elif browser == "edge":
     edge_driver = EdgeChromiumDriverManager().install()  # Get the EdgeDriver executable
@@ -141,6 +138,17 @@ elif browser == "firefox":
 else:
     print(f"Unsupported browser: {browser}. Please choose chrome or edge")
     exit(1)
+
+# def verify_extension_loaded(extension_name: str):
+#     driver.get("chrome://extensions/")
+#     time.sleep(2)  # let the page render
+#     page_source = driver.page_source
+#     return extension_name.lower() in page_source.lower()
+
+# if verify_extension_loaded("SquareX BDM"):
+#     print("✅ Extension is loaded and visible in chrome://extensions/")
+# else:
+#     print("❌ Extension not found — it may have failed to load.")
 
 #########################################################################################
 def login_function():
@@ -191,59 +199,62 @@ def login_function():
 ##############################################################################
 def check_for_existing_policies():
 
-    tbody = WebDriverWait(driver, 20).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR,
-                                        '#root > div > div.flex.flex-1.flex-col.overflow-auto.bg-background > main > div.mt-2.max-h-96.overflow-auto.rounded-md.border.bg-card > table > tbody'))
-    )
-
-    # Scroll the tbody to ensure all rows are loaded (for virtualized tables)
-    driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", tbody)
-
-    time.sleep(2)
-
-    # JavaScript code to find the number of rows in the tbody
-    js_code = """
-        const tbody = document.querySelector('#root > div > div.flex.flex-1.flex-col.overflow-auto.bg-background > main > div.mt-2.max-h-96.overflow-auto.rounded-md.border.bg-card > table > tbody');
-        return tbody ? tbody.querySelectorAll('tr').length : -1;  // -1 if tbody not found
-    """
-
-    # Execute JavaScript in the context of the current page
-    row_count = driver.execute_script(js_code)
-
-    # Check the result in Python and print output accordingly
-    if row_count == -1:
-        print("No existing policies.")
-
-    else:
-        print(f"Number of Existing Policies: {row_count}")
-        wait = WebDriverWait(driver, 10)   # # Proceed to delete the existing policy
-        top_check_box = wait.until(
-            EC.visibility_of_element_located(
-                (By.XPATH, "//*[@id='root']/div/div[2]/main/div[6]/table/thead/tr/th[1]/button"))
+    try:
+        tbody = WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR,
+                                            '#root > div > div.flex.flex-1.flex-col.overflow-auto.bg-background > main > div.mt-2.max-h-96.overflow-auto.rounded-md.border.bg-card > table > tbody'))
         )
-        top_check_box.click()
+
+        # Scroll the tbody to ensure all rows are loaded (for virtualized tables)
+        driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", tbody)
+
+        time.sleep(2)
+
+        # JavaScript code to find the number of rows in the tbody
+        js_code = """
+            const tbody = document.querySelector('#root > div > div.flex.flex-1.flex-col.overflow-auto.bg-background > main > div.mt-2.max-h-96.overflow-auto.rounded-md.border.bg-card > table > tbody');
+            return tbody ? tbody.querySelectorAll('tr').length : -1;  // -1 if tbody not found
+        """
+
+        # Execute JavaScript in the context of the current page
+        row_count = driver.execute_script(js_code)
+
+        # Check the result in Python and print output accordingly
+        if row_count == -1:
+            print("No existing policies.")
+
+        else:
+            print(f"Number of Existing Policies: {row_count}")
+            wait = WebDriverWait(driver, 10)   # # Proceed to delete the existing policy
+            top_check_box = wait.until(
+                EC.visibility_of_element_located(
+                    (By.XPATH, "//*[@id='root']/div/div[2]/main/div[6]/table/thead/tr/th[1]/button"))
+            )
+            top_check_box.click()
 
 
 
-        three_dot_button = wait.until(
-            EC.visibility_of_element_located(
-                (By.XPATH, "//*[@id='root']/div/div[2]/main/div[5]/div/button"))
-        )
-        three_dot_button.click()
+            three_dot_button = wait.until(
+                EC.visibility_of_element_located(
+                    (By.XPATH, "//*[@id='root']/div/div[2]/main/div[5]/div/button"))
+            )
+            three_dot_button.click()
 
-        delete_button = wait.until(
-            EC.visibility_of_element_located(
-                (By.XPATH, "//button[contains(text(), 'Delete')]"))
-        )
-        delete_button.click()
+            delete_button = wait.until(
+                EC.visibility_of_element_located(
+                    (By.XPATH, "//button[contains(text(), 'Delete')]"))
+            )
+            delete_button.click()
 
-        confirm_button = wait.until(
-            EC.visibility_of_element_located(
-                (By.XPATH, "//button[contains(text(), 'Confirm')]"))
-        )
-        confirm_button.click()
+            confirm_button = wait.until(
+                EC.visibility_of_element_located(
+                    (By.XPATH, "//button[contains(text(), 'Confirm')]"))
+            )
+            confirm_button.click()
 
-        print(f"{row_count} existing polices deleted.")
+            print(f"{row_count} existing polices deleted.")
+    except:
+        print("No detections")
 
 ##############################################################################
 def site_visit_policies_creation():
@@ -520,28 +531,21 @@ def click_element(driver, xpath: str, scroll: bool = True, timeout: int = 10):
         print(f"Timeout: Element with XPath '{xpath}' not found.")
         return None
 
-def check_status(driver, timeout=10):
-    try:
-        # Wait until the element with id 'main-title' is present
-        element = WebDriverWait(driver, timeout).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "#main-title"))
-        )
-        main_title = element.text
+def check_status(driver):
+   
+   
+   try:
+        main_title = driver.find_element(By.CSS_SELECTOR, "#main-title").text
+        main_title == 'Content Blocked'
+        blocked_url = driver.find_element(By.CSS_SELECTOR, "#url").text
+        print("  ")
+        print(blocked_url, " ", f"Website blocked by Square-X: {driver.current_url}")
 
-        # Check if the title matches 'Content Blocked'
-        if main_title == 'Content Blocked':
-            blocked_url = driver.find_element(By.CSS_SELECTOR, "#url").text
-            print("")
-            print(blocked_url, f"Website blocked by Square-X: {driver.current_url}")
-        else:
-            print("")
-            print("********************************************")
-            print(f"Unexpected title: '{main_title}' - Website not blocked: {driver.current_url}")
-            print("********************************************")
-    except (TimeoutException, NoSuchElementException) as e:
-        print("")
+
+   except NoSuchElementException:
+        print("  ")
         print("********************************************")
-        print(f"Website not blocked: {driver.current_url}, error: {e}")
+        print(f"Website not blocked: {driver.current_url}")
         print("********************************************")
 
 def open_sites(driver):
@@ -565,7 +569,7 @@ def open_sites(driver):
         time.sleep(3)  # Wait for the website to load
 
         # Check status
-        check_status(driver,timeout=10)
+        check_status(driver)
      
         # Close current tab and switch back
         # driver.close()
@@ -588,4 +592,5 @@ open_sites(driver)
 if driver:
     driver.quit()
     print("Browser closed.")
+    # shutil.rmtree(temp_dir)
 #########################################################################################
