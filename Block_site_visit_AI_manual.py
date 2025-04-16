@@ -26,8 +26,8 @@ from selenium.webdriver.chrome.options import Options as ChromeOptions
 required_envs = ["ADMIN_USERNAME", "ADMIN_PASSWORD", "TENANT_URL", "EXTENSION_PATH"]
 missing = [key for key in required_envs if not os.getenv(key)]
 
-if missing:
-    raise EnvironmentError(f"Missing environment variables: {', '.join(missing)}")
+# if missing:
+#     raise EnvironmentError(f"Missing environment variables: {', '.join(missing)}")
 
 
 #########################################################################################
