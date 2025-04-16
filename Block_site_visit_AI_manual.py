@@ -86,19 +86,26 @@ driver = None
 if browser == "chrome":
     extension_path = "/home/seluser/extension"
 
-    options = webdriver.ChromeOptions()
-    options.add_argument(f"--load-extension={extension_path}")
-    options.add_argument("--disable-gpu")
-    options.add_argument("--start-maximized")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
+    from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
-    print(f"Assuming extension is at: {extension_path}")
-    
-    driver = webdriver.Remote(
-        command_executor='http://localhost:4444/wd/hub',
-        options=options
-    )
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument(f"--load-extension={extension_path}")
+    chrome_options.add_argument("--start-maximized")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+
+# Merge with desired capabilities
+    capabilities = DesiredCapabilities.CHROME.copy()
+    chrome_options.set_capability("goog:chromeOptions", chrome_options.to_capabilities()["goog:chromeOptions"])
+
+    print("Launching Remote WebDriver with options:", chrome_options.arguments)
+
+   driver = webdriver.Remote(
+      command_executor='http://localhost:4444/wd/hub',
+      desired_capabilities=capabilities,
+      options=chrome_options
+   )
 
     # Give browser time to initialize
     time.sleep(5)
