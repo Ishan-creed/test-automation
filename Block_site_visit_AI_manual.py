@@ -86,6 +86,14 @@ driver = None
 if browser == "chrome":
     # Use the path where the extension is mounted in the container
     extension_path = "/home/seluser/extension"
+
+
+    if os.path.exists("/home/seluser/extension"):
+            print("Extension folder exists in the container!")
+            print("Contents:", os.listdir("/home/seluser/extension"))
+    else:
+            print("Extension folder not found in the container.")
+
     options = webdriver.ChromeOptions()
     
     # Add extension
