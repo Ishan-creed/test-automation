@@ -92,6 +92,7 @@ if browser == "chrome":
     
     # Add extension (path must match container's filesystem)
     options.add_argument(f"--load-extension={extension_path}") 
+    print("Extension installed")
     
     # Configure for Docker environment
     options.add_argument("--no-sandbox")
