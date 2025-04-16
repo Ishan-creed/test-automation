@@ -84,12 +84,17 @@ def print_details():
 driver = None
 
 if browser == "chrome":
-    extension_dir = "../onsqrx-20250404/"
-    extension_path = os.path.abspath(extension_dir)
+    # Use the path where the extension is mounted in the container
+    extension_path = "/home/seluser/extension"
     options = webdriver.ChromeOptions()
     
-    # Add extension (path must match container's filesystem)
-    options.add_argument(f"--load-extension={extension_path}") 
+    # Add extension
+    options.add_argument(f"--load-extension={extension_path}")
+
+    # Add this before creating the driver to debug
+    print(f"Using extension path: {extension_path}")
+    options.add_argument("--verbose")
+    options.add_argument("--enable-logging")
     
     # Configure for Docker environment
     options.add_argument("--no-sandbox")
