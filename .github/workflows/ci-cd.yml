@@ -1,49 +1,45 @@
 name: Python Automation CI/CD
-
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
-
 jobs:
   run-automation:
     runs-on: ubuntu-latest
-
     services:
       selenium:
         image: selenium/standalone-chrome:4.21.0
         ports:
           - 4444:4444
-          - 7900:7900  # ✅ Optional: VNC access
-        volumes:
-          - ${{ github.workspace }}/onsqrx-20250404.crx:/home/seluser/extension.crx:ro
-           
+          - 7900:7900 # VNC access
+        # No volume mounts to avoid overwriting container files
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-      - name: Verify CRX Exists
-        run: |
-          echo "Checking for CRX file..."
-          if [ -f "${{ github.workspace }}/onsqrx-20250404.crx" ]; then
-            echo "✅ CRX file exists"
-            file "${{ github.workspace }}/onsqrx-20250404.crx"
-          else
-            echo "❌ CRX file not found"
-            echo "Current directory contents:"
-            ls -la ${{ github.workspace }}
-          fi   
-
+      
       - name: Set Up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.9"
-
+      
       - name: Install Dependencies
         run: |
           pip install --upgrade pip
           pip install selenium webdriver-manager python-dotenv
-
+      
+      - name: Copy Extension to Selenium Container
+        run: |
+          # Get the container ID of the running Selenium container
+          CONTAINER_ID=$(docker ps -q --filter "ancestor=selenium/standalone-chrome:4.21.0")
+          echo "Selenium container ID: $CONTAINER_ID"
+          
+          # Copy the extension file directly to the container
+          docker cp ${{ github.workspace }}/onsqrx-20250404.crx $CONTAINER_ID:/home/seluser/extension.crx
+          
+          # Verify the file was copied successfully
+          docker exec $CONTAINER_ID ls -la /home/seluser/extension.crx
+      
       - name: Run Block Site Visit Script
         env:
           ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
@@ -53,6 +49,5 @@ jobs:
           ASSIGNED_PASSWORD: ${{ secrets.ASSIGNED_PASSWORD }}
           BROWSER: "chrome"
           POLICY_TYPE: ${{ secrets.POLICY_TYPE }}
-          EXTENSION_PATH: "/tmp/extensions"  # Path inside container
         run: |
           python Block_site_visit_AI_manual.py
