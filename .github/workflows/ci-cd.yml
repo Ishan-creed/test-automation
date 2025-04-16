@@ -17,11 +17,22 @@ jobs:
           - 4444:4444
           - 7900:7900  # ✅ Optional: VNC access
         volumes:
-           - ${{ github.workspace }}/onsqrx-20250404.crx:/home/seluser:ro
+          - ${{ github.workspace }}/onsqrx-20250404.crx:/home/seluser/extension.crx:ro
            
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+      - name: Verify CRX Exists
+        run: |
+          echo "Checking for CRX file..."
+          if [ -f "${{ github.workspace }}/onsqrx-20250404.crx" ]; then
+            echo "✅ CRX file exists"
+            file "${{ github.workspace }}/onsqrx-20250404.crx"
+          else
+            echo "❌ CRX file not found"
+            echo "Current directory contents:"
+            ls -la ${{ github.workspace }}
+          fi   
 
       - name: Set Up Python
         uses: actions/setup-python@v4
