@@ -83,6 +83,11 @@ def print_details():
 ##############################################################################
 driver = None
 
+import os
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+
+# For Chrome only in this example
 if browser == "chrome":
     extension_file = "../onsqrx-20250404/"
     extension_path = os.path.abspath(extension_file)
@@ -100,7 +105,27 @@ if browser == "chrome":
     driver = webdriver.Remote(
         command_executor='http://localhost:4444/wd/hub',
         options=options
-    ) 
+    )
+    
+    # Give the browser a moment to load the extension completely.
+    driver.implicitly_wait(10)  # You may adjust the wait as needed
+    
+    # Query Chrome DevTools for all active targets.
+    targets = driver.execute_cdp_cmd("Target.getTargets", {})
+    
+    # Filter the targets for any whose URL indicates a Chrome extension.
+    extension_targets = [
+        t for t in targets.get("targetInfos", [])
+        if "chrome-extension://" in t.get("url", "")
+    ]
+    
+    if extension_targets:
+        print("Extension verification: Found the following extension targets:")
+        for ext in extension_targets:
+            print(f" - Title: {ext.get('title')}, URL: {ext.get('url')}")
+    else:
+        print("Extension verification: No extension targets found, extension may not be loaded.")
+
 elif browser == "edge":
     edge_driver = EdgeChromiumDriverManager().install()  # Get the EdgeDriver executable
     options = webdriver.EdgeOptions()
