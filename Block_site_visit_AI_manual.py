@@ -85,7 +85,8 @@ driver = None
 
 if browser == "chrome":
     # Use absolute path inside container
-    crx_path = "../onsqrx-20250404.crx"  # Path in Docker container
+    crx_file = "../onsqrx-20250404.crx"  # Path in Docker container
+    crx_path = os.path.abspath(crx_file)
     
     options = webdriver.ChromeOptions()
     
