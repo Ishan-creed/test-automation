@@ -15,42 +15,37 @@ jobs:
         image: selenium/standalone-chrome:4.21.0
         ports:
           - 4444:4444
-        volumes:
-          - ./extensions:/tmp/extensions  # Mount extensions directory
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4  # Updated to latest version
 
       - name: Set Up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.9"
+          python-version: "3.11"
 
       - name: Install Dependencies
         run: |
           pip install --upgrade pip
-          pip install selenium webdriver-manager python-dotenv
+          pip install -r requirements.txt
 
-      - name: Run Block Block Site Visit Script
+      - name: Run Block Site Visit Script
         env:
           ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
           TENANT_URL: ${{ secrets.TENANT_URL }}
-          ASSIGNED_USERNAME: ${{ secrets.ASSIGNED_USERNAME }}
-          ASSIGNED_PASSWORD: ${{ secrets.ASSIGNED_PASSWORD }}
           BROWSER: "chrome"
-          POLICY_TYPE: ${{ secrets.POLICY_TYPE }}
-          EXTENSION_PATH: "/tmp/extensions"  # Path inside container
+          EXTENSION_PATH: "/path/to/extension"
         run: |
           python Block_site_visit_AI_manual.py
-          
-      - name: Upload Debug Artifacts
+
+      - name: Upload Artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4  # Changed from v3 to v4
         with:
-          name: selenium-debug
+          name: error-artifacts
           path: |
-            block_check_failure_*.png
+            error_*.png
             page_source_*.html
-            retention-days: 3
+          retention-days: 3
