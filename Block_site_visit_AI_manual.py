@@ -44,7 +44,7 @@ tenant_url = os.getenv("TENANT_URL")
 assigned_username = os.getenv("ASSIGNED_USERNAME")
 assigned_password = os.getenv("ASSIGNED_PASSWORD")
 
-extension_path = os.getenv("EXTENSION_PATH")
+# extension_path = os.getenv("EXTENSION_PATH")
 firefox_extension_path = os.getenv("EXTENSION_PATH_FIREFOX")
 policy_type = os.getenv("POLICY_TYPE")
 browser = os.getenv("BROWSER", "chrome").lower()
