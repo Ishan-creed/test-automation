@@ -89,8 +89,13 @@ from selenium.webdriver.common.by import By
 
 # For Chrome only in this example
 if browser == "chrome":
-    extension_file = "../onsqrx-20250404/"
-    extension_path = "/home/seluser/extension"        
+    if os.environ.get('CI'):
+    # When running in CI/CD, the extension is mounted to /home/seluser/extension inside the container.
+            extension_path = "/home/seluser/extension" 
+    else:
+    # On local systems, use your relative path.
+            extension_file = "../onsqrx-20250404/"
+            extension_path = os.path.abspath(extension_file)      
     options = webdriver.ChromeOptions()
     
     # Add extension (path must match container's filesystem)
