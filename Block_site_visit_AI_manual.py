@@ -72,7 +72,7 @@ def print_details():
     print(f"Browser version: {browser_version}")
     print(f"Platform name: {platform_name}")
     # Extract the directory containing the extension name
-    extension_dir = "../onsqrx-20250404/"
+    # extension_dir = "../onsqrx-20250404/"
 
     # Extract the extension name by splitting based on the last backslash
     extension_name = "SquareX BDM"
@@ -83,19 +83,14 @@ def print_details():
 ##############################################################################
 driver = None
 
-import os
-from selenium import webdriver
-from selenium.webdriver.common.by import By
+
 
 # For Chrome only in this example
 if browser == "chrome":
-    if os.environ.get('CI'):
+  
     # When running in CI/CD, the extension is mounted to /home/seluser/extension inside the container.
-            extension_path = "/home/seluser/extension" 
-    else:
-    # On local systems, use your relative path.
-            extension_file = "../onsqrx-20250404/"
-            extension_path = os.path.abspath(extension_file)      
+    extension_path = "/home/seluser/extension" 
+        
     options = webdriver.ChromeOptions()
     
     # Add extension (path must match container's filesystem)
@@ -112,24 +107,24 @@ if browser == "chrome":
         options=options
     )
     
-    # Give the browser a moment to load the extension completely.
-    driver.implicitly_wait(10)  # You may adjust the wait as needed
+    # # Give the browser a moment to load the extension completely.
+    # driver.implicitly_wait(10)  # You may adjust the wait as needed
     
-    # Query Chrome DevTools for all active targets.
-    targets = driver.execute_cdp_cmd("Target.getTargets", {})
+    # # Query Chrome DevTools for all active targets.
+    # targets = driver.execute_cdp_cmd("Target.getTargets", {})
     
-    # Filter the targets for any whose URL indicates a Chrome extension.
-    extension_targets = [
-        t for t in targets.get("targetInfos", [])
-        if "chrome-extension://" in t.get("url", "")
-    ]
+    # # Filter the targets for any whose URL indicates a Chrome extension.
+    # extension_targets = [
+    #     t for t in targets.get("targetInfos", [])
+    #     if "chrome-extension://" in t.get("url", "")
+    # ]
     
-    if extension_targets:
-        print("Extension verification: Found the following extension targets:")
-        for ext in extension_targets:
-            print(f" - Title: {ext.get('title')}, URL: {ext.get('url')}")
-    else:
-        print("Extension verification: No extension targets found, extension may not be loaded.")
+    # if extension_targets:
+    #     print("Extension verification: Found the following extension targets:")
+    #     for ext in extension_targets:
+    #         print(f" - Title: {ext.get('title')}, URL: {ext.get('url')}")
+    # else:
+    #     print("Extension verification: No extension targets found, extension may not be loaded.")
 
 elif browser == "edge":
     edge_driver = EdgeChromiumDriverManager().install()  # Get the EdgeDriver executable
