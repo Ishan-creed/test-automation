@@ -84,20 +84,42 @@ def print_details():
 driver = None
 
 if browser == "chrome":
+    # Use absolute path inside container
+    crx_path = "../onsqrx-20250404.crx"  # Path in Docker container
+    
     options = webdriver.ChromeOptions()
     
-    # Add extension (path must match container's filesystem)
-    options.add_argument(f"--load-extension={extension_path}") 
+    # Add extension from CRX file
+    options.add_extension(crx_path)
     
-    # Configure for Docker environment
+    # Required for Docker
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
     
-    # Connect to Selenium Grid in Docker container
+    # Verify extension load
+    options.add_argument("--enable-logging")
+    options.add_argument("--v=1")
+    
     driver = webdriver.Remote(
         command_executor='http://localhost:4444/wd/hub',
         options=options
     )
+    
+    # Verify extension installation
+    try:
+        driver.get("chrome://extensions")
+        WebDriverWait(driver, 10).until(
+            EC.text_to_be_present_in_element(
+                (By.TAG_NAME, "body"), 
+                "SquareX Enterprise"
+            )
+        )
+        print("Extension verified successfully")
+    except Exception as e:
+        print("Extension verification failed!")
+        driver.save_screenshot("extension_fail.png")
+        raise
 elif browser == "edge":
     edge_driver = EdgeChromiumDriverManager().install()  # Get the EdgeDriver executable
     options = webdriver.EdgeOptions()
