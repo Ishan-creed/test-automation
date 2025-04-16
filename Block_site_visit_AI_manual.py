@@ -87,7 +87,7 @@ if browser == "chrome":
     chrome_options = webdriver.ChromeOptions()
     
     # Read the CRX file and encode it as base64
-    crx_path = "/home/seluser/extension/onsqrx-20250404.crx"  # Path to your CRX file
+    crx_path = "/home/seluser/extension.crx"  # Path to your CRX file
     
     # Add extension using the encoded CRX approach
     if os.path.exists(crx_path):
