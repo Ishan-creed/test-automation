@@ -379,7 +379,7 @@ def site_visit_policies_creation():
         EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/div/div[2]/main/div[3]/div[2]/div/div[2]/input'))
     )
 
-    policy_id.send_keys("")
+    policy_id.send_keys("6y5grfe")
 
     time.sleep(1)
 
@@ -553,7 +553,7 @@ def open_sites(driver):
 print_details()
 
 login_function()
-check_for_existing_policies()
+# check_for_existing_policies()
 site_visit_policies_creation()
 
 assigned_user_login()
