@@ -85,7 +85,7 @@ driver = None
 
 if browser == "chrome":
     extension_dir = "../onsqrx-20250404/"
-    extension_path = os.os.path.abspath(extension_dir)
+    extension_path = os.path.abspath(extension_dir)
     options = webdriver.ChromeOptions()
     
     # Add extension (path must match container's filesystem)
