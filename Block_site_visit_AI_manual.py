@@ -84,46 +84,26 @@ def print_details():
 driver = None
 
 if browser == "chrome":
-    # Use the path where the extension is mounted in the container
     extension_path = "/home/seluser/extension"
 
-
-    if os.path.exists("/home/seluser/extension"):
-            print("Extension folder exists in the container!")
-            print("Contents:", os.listdir("/home/seluser/extension"))
-    else:
-            print("Extension folder not found in the container.")
-
     options = webdriver.ChromeOptions()
-    
-    # Add extension
-    # ✅ Load the unpacked extension
     options.add_argument(f"--load-extension={extension_path}")
-
-
-    
-    # ✅ Force non-headless mode (because headless disables some extensions)
-    # Remove `--headless=new` if it’s implicitly added
-    # This is needed since extensions are often disabled in headless mode
-    # NOTE: If running in headless is required, use OPTION 2
-    options.add_argument("--disable-gpu")  # Needed for some headless setups
-    options.add_argument("--start-maximized")  # Optional, just to keep it clean
-    
-    # Verbose logging (optional)
-    options.add_argument("--verbose")
-    options.add_argument("--enable-logging")
-    
-    # Docker-specific configs
+    options.add_argument("--disable-gpu")
+    options.add_argument("--start-maximized")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
 
+    print(f"Assuming extension is at: {extension_path}")
     
-    
-    # Create driver
     driver = webdriver.Remote(
         command_executor='http://localhost:4444/wd/hub',
         options=options
     )
+
+    # Give browser time to initialize
+    time.sleep(5)
+
+    # Check for extensions via Chrome DevTools Protocol
     targets = driver.execute_cdp_cmd("Target.getTargets", {})
     extension_targets = [
         t for t in targets.get("targetInfos", [])
@@ -131,11 +111,12 @@ if browser == "chrome":
     ]
 
     if extension_targets:
-        print("Extension is active!")
-        for t in extension_targets:
-            print(f" - {t.get('title')} | {t.get('url')}")
+        print("✅ Extension is active!")
+        for ext in extension_targets:
+            print(f" - Title: {ext.get('title')}, URL: {ext.get('url')}")
     else:
         print("❌ Extension not active.")
+
 elif browser == "edge":
     edge_driver = EdgeChromiumDriverManager().install()  # Get the EdgeDriver executable
     options = webdriver.EdgeOptions()
