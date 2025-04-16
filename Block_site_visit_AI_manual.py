@@ -90,7 +90,7 @@ from selenium.webdriver.common.by import By
 # For Chrome only in this example
 if browser == "chrome":
     extension_file = "../onsqrx-20250404/"
-    extension_path = os.path.abspath(extension_file)
+    extension_path = "/home/seluser/extension"        
     options = webdriver.ChromeOptions()
     
     # Add extension (path must match container's filesystem)
