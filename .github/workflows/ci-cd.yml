@@ -17,7 +17,7 @@ jobs:
           - 4444:4444
           - 7900:7900  # ✅ Optional: VNC access
         volumes:
-           - ${{ github.workspace }}/onsqrx-20250404:/home/seluser/extension.crx:ro
+           - ${{ github.workspace }}/onsqrx-20250404.crx:/home/seluser/extension.crx:ro
            
     steps:
       - name: Checkout Repository
