@@ -503,22 +503,28 @@ def click_element(driver, xpath: str, scroll: bool = True, timeout: int = 10):
         print(f"Timeout: Element with XPath '{xpath}' not found.")
         return None
 
-def check_status(driver):
-   
-   
-   try:
-        main_title = driver.find_element(By.CSS_SELECTOR, "#main-title").text
-        main_title == 'Content Blocked'
-        blocked_url = driver.find_element(By.CSS_SELECTOR, "#url").text
-        print("  ")
-        print(blocked_url, " ", f"Website blocked by Square-X: {driver.current_url}")
+def check_status(driver, timeout=10):
+    try:
+        # Wait until the element with id 'main-title' is present
+        element = WebDriverWait(driver, timeout).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "#main-title"))
+        )
+        main_title = element.text
 
-
-   except NoSuchElementException as e:
-        print("  ")
+        # Check if the title matches 'Content Blocked'
+        if main_title == 'Content Blocked':
+            blocked_url = driver.find_element(By.CSS_SELECTOR, "#url").text
+            print("")
+            print(blocked_url, f"Website blocked by Square-X: {driver.current_url}")
+        else:
+            print("")
+            print("********************************************")
+            print(f"Unexpected title: '{main_title}' - Website not blocked: {driver.current_url}")
+            print("********************************************")
+    except (TimeoutException, NoSuchElementException) as e:
+        print("")
         print("********************************************")
-        print(f"Website not blocked: {driver.current_url}")
-        print(e)
+        print(f"Website not blocked: {driver.current_url}, error: {e}")
         print("********************************************")
 
 def open_sites(driver):
