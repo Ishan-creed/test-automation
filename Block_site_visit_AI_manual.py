@@ -72,7 +72,7 @@ def print_details():
     print(f"Browser version: {browser_version}")
     print(f"Platform name: {platform_name}")
     # Extract the directory containing the extension name
-    # extension_dir = "../onsqrx-20250404/"
+ 
 
     # Extract the extension name by splitting based on the last backslash
     extension_name = "SquareX BDM"
@@ -83,19 +83,13 @@ def print_details():
 ##############################################################################
 driver = None
 
-
-
-# For Chrome only in this example
 if browser == "chrome":
-  
-    # When running in CI/CD, the extension is mounted to /home/seluser/extension inside the container.
-    extension_path = "/home/seluser/extension" 
-        
+    extension_dir = "../onsqrx-20250404/"
+    extension_path = os.os.path.abspath(extension_dir)
     options = webdriver.ChromeOptions()
     
     # Add extension (path must match container's filesystem)
     options.add_argument(f"--load-extension={extension_path}") 
-    print("Extension installed")
     
     # Configure for Docker environment
     options.add_argument("--no-sandbox")
@@ -106,26 +100,6 @@ if browser == "chrome":
         command_executor='http://localhost:4444/wd/hub',
         options=options
     )
-    
-    # # Give the browser a moment to load the extension completely.
-    # driver.implicitly_wait(10)  # You may adjust the wait as needed
-    
-    # # Query Chrome DevTools for all active targets.
-    # targets = driver.execute_cdp_cmd("Target.getTargets", {})
-    
-    # # Filter the targets for any whose URL indicates a Chrome extension.
-    # extension_targets = [
-    #     t for t in targets.get("targetInfos", [])
-    #     if "chrome-extension://" in t.get("url", "")
-    # ]
-    
-    # if extension_targets:
-    #     print("Extension verification: Found the following extension targets:")
-    #     for ext in extension_targets:
-    #         print(f" - Title: {ext.get('title')}, URL: {ext.get('url')}")
-    # else:
-    #     print("Extension verification: No extension targets found, extension may not be loaded.")
-
 elif browser == "edge":
     edge_driver = EdgeChromiumDriverManager().install()  # Get the EdgeDriver executable
     options = webdriver.EdgeOptions()
@@ -407,7 +381,7 @@ def site_visit_policies_creation():
         EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/div/div[2]/main/div[3]/div[2]/div/div[2]/input'))
     )
 
-    policy_id.send_keys("6y5grfe")
+    policy_id.send_keys("")
 
     time.sleep(1)
 
@@ -475,7 +449,6 @@ def site_visit_policies_creation():
     policy_page = tenant_url + policy_list_page_url
 
     driver.get(policy_page)
-    driver.get(tenant_url)
 ##############################################################################
 def assigned_user_login():
     driver.delete_all_cookies()
@@ -532,22 +505,28 @@ def click_element(driver, xpath: str, scroll: bool = True, timeout: int = 10):
         print(f"Timeout: Element with XPath '{xpath}' not found.")
         return None
 
-def check_status(driver):
-   
-   
-   try:
-        main_title = driver.find_element(By.CSS_SELECTOR, "#main-title").text
-        main_title == 'Content Blocked'
-        blocked_url = driver.find_element(By.CSS_SELECTOR, "#url").text
-        print("  ")
-        print(blocked_url, " ", f"Website blocked by Square-X: {driver.current_url}")
+def check_status(driver, timeout=10):
+    try:
+        # Wait until the element with id 'main-title' is present
+        element = WebDriverWait(driver, timeout).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "#main-title"))
+        )
+        main_title = element.text
 
-
-   except NoSuchElementException as e:
-        print("  ")
+        # Check if the title matches 'Content Blocked'
+        if main_title == 'Content Blocked':
+            blocked_url = driver.find_element(By.CSS_SELECTOR, "#url").text
+            print("")
+            print(blocked_url, f"Website blocked by Square-X: {driver.current_url}")
+        else:
+            print("")
+            print("********************************************")
+            print(f"Unexpected title: '{main_title}' - Website not blocked: {driver.current_url}")
+            print("********************************************")
+    except (TimeoutException, NoSuchElementException) as e:
+        print("")
         print("********************************************")
-        print(f"Website not blocked: {driver.current_url}")
-        print(e)
+        print(f"Website not blocked: {driver.current_url}, error: {e}")
         print("********************************************")
 
 def open_sites(driver):
@@ -571,7 +550,7 @@ def open_sites(driver):
         time.sleep(3)  # Wait for the website to load
 
         # Check status
-        check_status(driver)
+        check_status(driver,timeout=10)
      
         # Close current tab and switch back
         # driver.close()
@@ -586,7 +565,7 @@ login_function()
 # check_for_existing_policies()
 site_visit_policies_creation()
 
-# assigned_user_login()
+assigned_user_login()
 open_sites(driver)
 
 
