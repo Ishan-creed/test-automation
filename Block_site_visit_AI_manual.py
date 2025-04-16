@@ -92,7 +92,7 @@ if browser == "chrome":
     chrome_options.add_argument("--disable-gpu")
     
     # Path where we copied the extension in the workflow
-    crx_path = "/home/seluser/extension.crx"
+    crx_path = "/home/seluser/extensions/onsqrx-20250404.crx"
     
     try:
         print(f"Attempting to load extension from {crx_path}")
