@@ -402,7 +402,7 @@ def site_visit_policies_creation():
 
     # Wait for the value option to be clickable
     value_click2 = wait.until(EC.element_to_be_clickable(
-        (By.XPATH, "//div[@dir='ltr']//div[3]")
+        (By.XPATH, "//div[@dir='ltr']//div[6]")
     ))
     value_click2.click()  # Click the value option
      
@@ -421,7 +421,7 @@ def site_visit_policies_creation():
 
     # Wait for the value option to be clickable
     value_click = wait.until(EC.element_to_be_clickable(
-        (By.XPATH, "//div[@dir='ltr']//div[2]")
+        (By.XPATH, "//div[@dir='ltr']//div[3]")
     ))
     value_click.click()  # Click the value option
 
