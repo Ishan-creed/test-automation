@@ -18,10 +18,19 @@ jobs:
         volumes:
           - ${{ github.workspace }}/onsqrx-20250404:/home/seluser/extension:ro
 
+      
+
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4  # Updated to latest version
+        
+      - name: Debug Mounted Files
+        run: |
+          docker run --rm \
+          -v ${{ github.workspace }}/onsqrx-20250404:/home/seluser/extension:ro \
+          alpine ls -la /home/seluser/extension
+  
 
       - name: Set Up Python
         uses: actions/setup-python@v4
