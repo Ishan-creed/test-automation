@@ -35,8 +35,10 @@ jobs:
           ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
           TENANT_URL: ${{ secrets.TENANT_URL }}
+          ASSIGNED_USERNAME: ${{ secrets.ASSIGNED_USERNAME }}
+          ASSIGNED_PASSWORD: ${{ secrets.ASSIGNED_PASSWORD }}
           BROWSER: "chrome"
-          EXTENSION_PATH: "/path/to/extension"
+          POLICY_TYPE: ${{ secrets.POLICY_TYPE }}
         run: |
           python Block_site_visit_AI_manual.py
 
