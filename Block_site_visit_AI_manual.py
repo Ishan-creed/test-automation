@@ -97,22 +97,45 @@ if browser == "chrome":
     options = webdriver.ChromeOptions()
     
     # Add extension
+    # ✅ Load the unpacked extension
     options.add_argument(f"--load-extension={extension_path}")
 
-    # Add this before creating the driver to debug
-    print(f"Using extension path: {extension_path}")
+
+    
+    # ✅ Force non-headless mode (because headless disables some extensions)
+    # Remove `--headless=new` if it’s implicitly added
+    # This is needed since extensions are often disabled in headless mode
+    # NOTE: If running in headless is required, use OPTION 2
+    options.add_argument("--disable-gpu")  # Needed for some headless setups
+    options.add_argument("--start-maximized")  # Optional, just to keep it clean
+    
+    # Verbose logging (optional)
     options.add_argument("--verbose")
     options.add_argument("--enable-logging")
     
-    # Configure for Docker environment
+    # Docker-specific configs
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
+
     
-    # Connect to Selenium Grid in Docker container
+    
+    # Create driver
     driver = webdriver.Remote(
         command_executor='http://localhost:4444/wd/hub',
         options=options
     )
+    targets = driver.execute_cdp_cmd("Target.getTargets", {})
+    extension_targets = [
+        t for t in targets.get("targetInfos", [])
+        if "chrome-extension://" in t.get("url", "")
+    ]
+
+    if extension_targets:
+        print("Extension is active!")
+        for t in extension_targets:
+            print(f" - {t.get('title')} | {t.get('url')}")
+    else:
+        print("❌ Extension not active.")
 elif browser == "edge":
     edge_driver = EdgeChromiumDriverManager().install()  # Get the EdgeDriver executable
     options = webdriver.EdgeOptions()
