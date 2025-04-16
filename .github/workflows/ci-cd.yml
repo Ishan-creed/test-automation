@@ -44,3 +44,13 @@ jobs:
           EXTENSION_PATH: "/tmp/extensions"  # Path inside container
         run: |
           python Block_site_visit_AI_manual.py
+          
+      - name: Upload Debug Artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: selenium-debug
+          path: |
+            block_check_failure_*.png
+            page_source_*.html
+            retention-days: 3
