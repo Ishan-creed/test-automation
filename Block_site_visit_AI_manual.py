@@ -84,11 +84,20 @@ def print_details():
 driver = None
 
 if browser == "chrome":
-        
-    chrome_driver = ChromeDriverManager().install()  # Get the ChromeDriver executable
     options = webdriver.ChromeOptions()
-    options.add_argument(f"--load-extension={extension_path}")  # Load Chrome extension
-    driver = webdriver.Chrome(service=ChromeService(chrome_driver), options=options)
+    
+    # Add extension (path must match container's filesystem)
+    options.add_argument(f"--load-extension={extension_path}") 
+    
+    # Configure for Docker environment
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    
+    # Connect to Selenium Grid in Docker container
+    driver = webdriver.Remote(
+        command_executor='http://localhost:4444/wd/hub',
+        options=options
+    )
 elif browser == "edge":
         
     edge_driver = EdgeChromiumDriverManager().install()  # Get the EdgeDriver executable
