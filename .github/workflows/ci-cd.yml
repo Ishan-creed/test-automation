@@ -43,4 +43,4 @@ jobs:
           POLICY_TYPE: ${{ secrets.POLICY_TYPE }}
           EXTENSION_PATH: "/tmp/extensions"  # Path inside container
         run: |
-          python Block_site_visit_AI_manual.py
+          python block_github_file_download_manual.py
