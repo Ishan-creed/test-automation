@@ -35,10 +35,10 @@ jobs:
           echo "Selenium container ID: $CONTAINER_ID"
           
           # Copy the extension file directly to the container
-          docker cp ${{ github.workspace }}/onsqrx-20250404.crx $CONTAINER_ID:/home/seluser/extension.crx
+          docker cp ${{ github.workspace }}/onsqrx-20250404.crx $CONTAINER_ID:/home/seluser/extensions
           
           # Verify the file was copied successfully
-          docker exec $CONTAINER_ID ls -la /home/seluser/extension.crx
+          docker exec $CONTAINER_ID ls -la /home/seluser/extensions/onsqrx-20250404.crx
       
       - name: Run Block Site Visit Script
         env:
