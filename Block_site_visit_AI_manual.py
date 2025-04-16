@@ -84,45 +84,23 @@ def print_details():
 driver = None
 
 if browser == "chrome":
-    chrome_options = webdriver.ChromeOptions()
+    grid_url = "http://localhost:4444/wd/hub"
+    options = ChromeOptions()
     
-    # Set Chrome options first (before adding the extension)
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--disable-gpu")
-    
-    # Path where we copied the extension in the workflow
-    crx_path = "/home/seluser/extensions/onsqrx-20250404.crx"
-    
-    try:
-        print(f"Attempting to load extension from {crx_path}")
-        
-        if os.path.exists(crx_path):
-            print("✅ Extension file exists")
-            with open(crx_path, 'rb') as f:
-                extension_bytes = f.read()
-                encoded_extension = base64.b64encode(extension_bytes).decode('utf-8')
-            
-            try:
-                chrome_options.add_encoded_extension(encoded_extension)
-                print("✅ Added encoded extension successfully")
-            except Exception as e:
-                print(f"❌ Error adding encoded extension: {e}")
-                
-                # Fallback to direct method if encoding fails
-                try:
-                    chrome_options.add_extension(crx_path)
-                    print("✅ Added extension directly")
-                except Exception as e2:
-                    print(f"❌ Both extension loading methods failed: {e2}")
-        else:
-            print(f"❌ File not found at {crx_path}")
-            print("Directory contents:")
-            parent_dir = os.path.dirname(crx_path)
-            if os.path.exists(parent_dir):
-                print(os.listdir(parent_dir))
-    except Exception as e:
-        print(f"❌ Error during extension loading process: {e}")
+    # Add all Chrome arguments BEFORE creating the driver
+    options.add_argument("--disable-gpu")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--remote-debugging-port=9222")
+
+    # Load extension if needed
+    with open("extension_base64.txt", "r") as f:
+        encoded = f.read()
+    options.add_encoded_extension(encoded)
+
+    # Create Remote WebDriver with configured options
+    driver = webdriver.Remote(command_executor=grid_url, options=options)
+
     
     # Create the driver with more verbose error handling
     try:
