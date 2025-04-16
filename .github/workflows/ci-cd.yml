@@ -10,10 +10,13 @@ jobs:
   run-automation:
     runs-on: ubuntu-latest
 
-    # Add these steps before the steps section
-    defaults:
-      run:
-        shell: bash
+    services:
+      selenium:
+        image: selenium/standalone-chrome:4.21.0
+        ports:
+          - 4444:4444
+        volumes:
+          - ./extensions:/tmp/extensions  # Mount extensions directory
 
     steps:
       - name: Checkout Repository
@@ -26,30 +29,9 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y wget unzip xvfb libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xinput0 libxcb-xfixes0
           pip install --upgrade pip
-          pip install selenium webdriver-manager python-dotenv pyvirtualdisplay
+          pip install selenium webdriver-manager python-dotenv
 
-      - name: Install Chrome
-        run: |
-          sudo apt-get install -y google-chrome-stable
-          google-chrome --version
-
-      # - name: Start Xvfb
-      #   run: |
-      #     Xvfb :99 -screen 0 1920x1080x24 &
-      #     export DISPLAY=:99
-      #     sleep 5  # Give Xvfb time to start
-
-      - name: Cleanup Chrome Processes and Temporary Directories
-        run: |
-          pkill -f chrome || true
-          pkill -f Xvfb || true
-          sleep 2
-          mkdir -p /tmp/chrome-data
-          chmod 777 /tmp/chrome-data
-          
       - name: Run Block Site Visit Script
         env:
           ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
@@ -59,26 +41,6 @@ jobs:
           ASSIGNED_PASSWORD: ${{ secrets.ASSIGNED_PASSWORD }}
           BROWSER: "chrome"
           POLICY_TYPE: ${{ secrets.POLICY_TYPE }}
-          EXTENSION_PATH: ${{ secrets.EXTENSION_PATH }}
-          DISPLAY: :99
+          EXTENSION_PATH: "/tmp/extensions"  # Path inside container
         run: |
           python Block_site_visit_AI_manual.py
-      
-            - name: Run Block Site Visit Script
-              env:
-                ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
-                ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
-                TENANT_URL: ${{ secrets.TENANT_URL }}
-                ASSIGNED_USERNAME: ${{ secrets.ASSIGNED_USERNAME }}
-                ASSIGNED_PASSWORD: ${{ secrets.ASSIGNED_PASSWORD }}
-                BROWSER: "chrome"
-                POLICY_TYPE: ${{ secrets.POLICY_TYPE }}
-                EXTENSION_PATH: ${{ secrets.EXTENSION_PATH }}
-              run: |
-                # Clean up any existing Chrome processes
-                pkill -o -f "chrome" || true
-                python Block_site_visit_AI_manual.py
-      
-            - name: Stop Xvfb
-              if: always()
-              run: pkill -f "Xvfb"
