@@ -89,7 +89,7 @@ if browser == "chrome":
     from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
     chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument(f"--load-extension={extension_path}")
+    chrome_options.add_argument("--load-extension=/home/seluser/extension")
     chrome_options.add_argument("--start-maximized")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--no-sandbox")
