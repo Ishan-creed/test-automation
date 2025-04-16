@@ -84,7 +84,7 @@ def print_details():
 driver = None
 
 if browser == "chrome":
-    extension_path = "/home/seluser/extension/onsqrx-20250404"
+    extension_path = "/home/seluser/extension/onsqrx-20250404/"
 
     from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
