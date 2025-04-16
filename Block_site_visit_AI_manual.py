@@ -86,17 +86,20 @@ driver = None
 if browser == "chrome":
     chrome_options = webdriver.ChromeOptions()
     
-    # Path inside the container
-    extension_path = "/home/seluser/extension.crx"
+    # Read the CRX file and encode it as base64
+    crx_path = "/home/seluser/extension/onsqrx-20250404.crx"  # Path to your CRX file
     
-    # Add the extension
-    try:
-        chrome_options.add_extension(extension_path)
-        print(f"✅ Extension added from path: {extension_path}")
-    except Exception as e:
-        print(f"❌ Error adding extension: {e}")
+    # Add extension using the encoded CRX approach
+    if os.path.exists(crx_path):
+        with open(crx_path, 'rb') as f:
+            extension_bytes = f.read()
+            encoded_extension = base64.b64encode(extension_bytes).decode('utf-8')
+        chrome_options.add_encoded_extension(encoded_extension)
+        print(f"✅ Added extension from {crx_path} (encoded)")
+    else:
+        print(f"❌ CRX file not found at {crx_path}")
     
-    # Other required options
+    # Other options
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     
@@ -105,7 +108,6 @@ if browser == "chrome":
         command_executor='http://localhost:4444/wd/hub',
         options=chrome_options
     )
-
     # Give browser time to initialize
     time.sleep(5)
 
