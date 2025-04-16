@@ -17,7 +17,7 @@ from webdriver_manager.microsoft import EdgeChromiumDriverManager
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
-import tempfile
+
 
 #########################################################################################
 # Load environment variables from the .env file
@@ -99,7 +99,6 @@ if browser == "chrome":
         options=options
     )
 elif browser == "edge":
-        
     edge_driver = EdgeChromiumDriverManager().install()  # Get the EdgeDriver executable
     options = webdriver.EdgeOptions()
     options.add_argument(f"--load-extension={extension_path}")  # Load Edge extension
