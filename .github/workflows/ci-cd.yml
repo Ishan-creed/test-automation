@@ -9,12 +9,15 @@ on:
 jobs:
   run-automation:
     runs-on: ubuntu-latest
-
+    
     services:
       selenium:
         image: selenium/standalone-chrome:4.21.0
         ports:
           - 4444:4444
+        volumes:
+          - ${{ github.workspace }}/onsqrx-20250404:/home/seluser/extension:ro
+
 
     steps:
       - name: Checkout Repository
