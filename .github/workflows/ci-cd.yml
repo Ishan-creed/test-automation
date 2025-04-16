@@ -32,7 +32,7 @@ jobs:
           pip install --upgrade pip
           pip install selenium webdriver-manager python-dotenv
 
-      - name: Run Block Block File Download Script
+      - name: Run Block Block Site Visit Script
         env:
           ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
@@ -43,4 +43,4 @@ jobs:
           POLICY_TYPE: ${{ secrets.POLICY_TYPE }}
           EXTENSION_PATH: "/tmp/extensions"  # Path inside container
         run: |
-          python block_github_file_download_manual.py
+          python Block_site_visit_AI_manual.py
