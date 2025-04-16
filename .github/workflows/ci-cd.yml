@@ -1,45 +1,53 @@
-name: Python Automation CI/CD
+name: Python Automation CI/CD.
+
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+
 jobs:
   run-automation:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        browser: [chrome]
+      
     services:
       selenium:
-        image: selenium/standalone-chrome:4.21.0
+        image: selenium/standalone-${{ matrix.browser }}:4.21.0
         ports:
           - 4444:4444
-          - 7900:7900 # VNC access
-        # No volume mounts to avoid overwriting container files
+
+    # Add these steps before the steps section
+    defaults:
+      run:
+        shell: bash
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-      
+
       - name: Set Up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.9"
-      
+          python-version: "3.11"
+
       - name: Install Dependencies
         run: |
+          sudo apt-get update
+          sudo apt-get install -y wget unzip xvfb libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xinput0 libxcb-xfixes0
           pip install --upgrade pip
-          pip install selenium webdriver-manager python-dotenv
-      
-      - name: Copy Extension to Selenium Container
+
+      - name: Install core dependencies
+        run: pip install selenium webdriver-manager python-dotenv pyvirtualdisplay
+
+      - name: Install Chrome
         run: |
-          # Get the container ID of the running Selenium container
-          CONTAINER_ID=$(docker ps -q --filter "ancestor=selenium/standalone-chrome:4.21.0")
-          echo "Selenium container ID: $CONTAINER_ID"
-          
-          # Copy the extension file directly to the container
-          docker cp ${{ github.workspace }}/onsqrx-20250404.crx $CONTAINER_ID:/home/seluser/extensions
-          
-          # Verify the file was copied successfully
-          docker exec $CONTAINER_ID ls -la /home/seluser/extensions
-      
+          sudo apt-get install -y google-chrome-stable
+          google-chrome --version
+            
       - name: Run Block Site Visit Script
         env:
           ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
@@ -49,5 +57,13 @@ jobs:
           ASSIGNED_PASSWORD: ${{ secrets.ASSIGNED_PASSWORD }}
           BROWSER: "chrome"
           POLICY_TYPE: ${{ secrets.POLICY_TYPE }}
+          # EXTENSION_PATH: "./onsqrx-20250404"
         run: |
+          # Clean up any existing Chrome processes (make sure pkill doesn't break the CI/CD pipeline)
+
+          # Run the Python script
           python Block_site_visit_AI_manual.py
+
+      - name: Stop Xvfb
+        if: always()
+        run: kill $XVFB_PID || true
