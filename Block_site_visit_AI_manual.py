@@ -514,10 +514,11 @@ def check_status(driver):
         print(blocked_url, " ", f"Website blocked by Square-X: {driver.current_url}")
 
 
-   except NoSuchElementException:
+   except NoSuchElementException as e:
         print("  ")
         print("********************************************")
         print(f"Website not blocked: {driver.current_url}")
+        print(e)
         print("********************************************")
 
 def open_sites(driver):
