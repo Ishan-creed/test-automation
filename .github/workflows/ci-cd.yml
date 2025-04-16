@@ -9,38 +9,29 @@ on:
 jobs:
   run-automation:
     runs-on: ubuntu-latest
-    
+
     services:
       selenium:
-        image: selenium/standalone-chrome:4.21.0
+        image: selenium/standalone-chrome:4.21.0-debug
         ports:
           - 4444:4444
+          - 7900:7900  # ✅ Optional: VNC access
         volumes:
-          - ${{ github.workspace }}/onsqrx-20250404:/home/seluser/extension:ro
-
-      
-
-
+           - ${{ github.workspace }}/onsqrx-20250404:/home/seluser/extension:ro
+           
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4  # Updated to latest version
-        
-      - name: Debug Mounted Files
-        run: |
-          docker run --rm \
-          -v ${{ github.workspace }}/onsqrx-20250404:/home/seluser/extension:ro \
-          alpine ls -la /home/seluser/extension
-  
+        uses: actions/checkout@v3
 
       - name: Set Up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
+          python-version: "3.9"
 
       - name: Install Dependencies
         run: |
           pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install selenium webdriver-manager python-dotenv
 
       - name: Run Block Site Visit Script
         env:
@@ -51,15 +42,6 @@ jobs:
           ASSIGNED_PASSWORD: ${{ secrets.ASSIGNED_PASSWORD }}
           BROWSER: "chrome"
           POLICY_TYPE: ${{ secrets.POLICY_TYPE }}
+          EXTENSION_PATH: "/tmp/extensions"  # Path inside container
         run: |
           python Block_site_visit_AI_manual.py
-
-      - name: Upload Artifacts
-        if: always()
-        uses: actions/upload-artifact@v4  # Changed from v3 to v4
-        with:
-          name: error-artifacts
-          path: |
-            error_*.png
-            page_source_*.html
-          retention-days: 3
