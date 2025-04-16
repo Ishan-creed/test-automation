@@ -105,7 +105,7 @@ if browser == "chrome":
     options.add_argument("--remote-debugging-port=9222")
 
     # Load extension if needed
-    with open("tests/extension_base64.txt", "r") as f:
+    with open("extension_base64.txt", "r") as f:
         encoded = f.read()
     options.add_encoded_extension(encoded)
 
