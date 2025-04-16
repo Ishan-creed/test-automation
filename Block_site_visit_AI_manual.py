@@ -447,6 +447,7 @@ def site_visit_policies_creation():
     policy_page = tenant_url + policy_list_page_url
 
     driver.get(policy_page)
+    driver.get(tenant_url)
 ##############################################################################
 def assigned_user_login():
     driver.delete_all_cookies()
@@ -652,7 +653,7 @@ login_function()
 # check_for_existing_policies()
 site_visit_policies_creation()
 
-assigned_user_login()
+# assigned_user_login()
 open_sites(driver)
 
 
